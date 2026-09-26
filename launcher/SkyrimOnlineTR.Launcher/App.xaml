@@ -1,0 +1,147 @@
+<Application x:Class="SkyrimOnlineTR.Launcher.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <FontFamily x:Key="Display">pack://application:,,,/Assets/Fonts/#Cinzel</FontFamily>
+        <FontFamily x:Key="Body">Segoe UI</FontFamily>
+
+        <Color x:Key="GoldColor">#C9A45C</Color>
+        <SolidColorBrush x:Key="Gold" Color="#C9A45C"/>
+        <SolidColorBrush x:Key="GoldBright" Color="#EAD29A"/>
+        <SolidColorBrush x:Key="GoldDim" Color="#6E5A33"/>
+        <SolidColorBrush x:Key="Parchment" Color="#E8DCC0"/>
+        <SolidColorBrush x:Key="Muted" Color="#8F8573"/>
+        <SolidColorBrush x:Key="Panel" Color="#B0100E0C"/>
+        <SolidColorBrush x:Key="Danger" Color="#C8583E"/>
+        <SolidColorBrush x:Key="Ok" Color="#7FB069"/>
+
+        <LinearGradientBrush x:Key="GoldGradient" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#F3DFA8" Offset="0"/>
+            <GradientStop Color="#C9A45C" Offset="0.5"/>
+            <GradientStop Color="#8C6A2E" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Window control glyph buttons -->
+        <Style x:Key="ChromeButton" TargetType="Button">
+            <Setter Property="Width" Value="40"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bg" Background="Transparent" CornerRadius="4">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bg" Property="Background" Value="#22C9A45C"/>
+                                <Setter Property="Foreground" Value="{StaticResource GoldBright}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Quiet text link -->
+        <Style x:Key="LinkButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Body}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <ContentPresenter/>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource GoldBright}"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- The main action button: engraved gold plate with notched corners -->
+        <Style x:Key="PlayButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource Display}"/>
+            <Setter Property="FontSize" Value="24"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Foreground" Value="#1A140A"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid x:Name="root">
+                            <Path x:Name="plate" Stretch="Fill" Fill="{StaticResource GoldGradient}"
+                                  Data="M 14,0 L 286,0 L 300,14 L 300,50 L 286,64 L 14,64 L 0,50 L 0,14 Z">
+                                <Path.Effect>
+                                    <DropShadowEffect x:Name="glow" Color="#C9A45C" BlurRadius="18" ShadowDepth="0" Opacity="0.35"/>
+                                </Path.Effect>
+                            </Path>
+                            <Path Stretch="Fill" Margin="5" Stroke="#5A4418" StrokeThickness="1" Opacity="0.7"
+                                  Data="M 12,0 L 278,0 L 290,12 L 290,42 L 278,54 L 12,54 L 0,42 L 0,12 Z"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="plate" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect Color="#EAD29A" BlurRadius="30" ShadowDepth="0" Opacity="0.7"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="root" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <TranslateTransform Y="1"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="plate" Property="Fill" Value="#3A3326"/>
+                                <Setter Property="Foreground" Value="#8F8573"/>
+                                <Setter TargetName="plate" Property="Effect" Value="{x:Null}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Thin gold progress rail -->
+        <Style x:Key="GoldProgress" TargetType="ProgressBar">
+            <Setter Property="Height" Value="4"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Grid>
+                            <Border Background="#33C9A45C" CornerRadius="2"/>
+                            <Border x:Name="PART_Track"/>
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="2"
+                                    Background="{StaticResource GoldGradient}">
+                                <Border.Effect>
+                                    <DropShadowEffect Color="#EAD29A" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                                </Border.Effect>
+                            </Border>
+                            <Border x:Name="PART_GlowRect" Width="120" HorizontalAlignment="Left" CornerRadius="2"
+                                    Background="{StaticResource GoldGradient}" Visibility="Collapsed"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsIndeterminate" Value="True">
+                                <Setter TargetName="PART_Indicator" Property="Visibility" Value="Collapsed"/>
+                                <Setter TargetName="PART_GlowRect" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Application.Resources>
+</Application>
