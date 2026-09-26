@@ -855,7 +855,13 @@ bool MpActor::IsSpellLearnedFromBase(const uint32_t spellId) const
   const auto npcData = espm::GetData<espm::NPC_>(GetBaseId(), GetParent());
   const auto npc = GetParent()->GetEspm().GetBrowser().LookupById(GetBaseId());
 
-  const uint32_t raceId = npc.ToGlobalId(npcData.race);
+  // Players share the Player base record (Nord), so their chosen race lives in
+  // the appearance. Without this, racial powers of other races are "not
+  // learned" and every equipment update carrying them is rejected.
+  const auto appearance = GetAppearance();
+  const uint32_t raceId = appearance && appearance->raceId
+    ? appearance->raceId
+    : npc.ToGlobalId(npcData.race);
 
   const auto raceData = espm::GetData<espm::RACE>(raceId, GetParent());
   const auto race = GetParent()->GetEspm().GetBrowser().LookupById(raceId);
