@@ -1,14 +1,16 @@
 using System.Diagnostics;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace SkyrimOnlineTR.Launcher.Core;
 
 /// <summary>
-/// Turns the modlist's Stock Game (a copy of the player's Steam 1.7.104 files, made by Wabbajack)
-/// into 1.6.1170 with HDiffPatch patches. Only the copy is touched; the Steam install never is.
-/// Idempotent: files already at the target hash are skipped.
+/// Builds the launcher's own game folder (InstallRoot\Game) at 1.6.1170 from the player's Steam
+/// Skyrim. Files that differ between versions are patched straight from the Steam copy with
+/// HDiffPatch; the rest are copied. Creation Club content is never copied. The Steam install is
+/// only read, never written.
 /// </summary>
 public sealed class Downgrader(HttpClient http, InstallState state)
 {
@@ -20,54 +22,137 @@ public sealed class Downgrader(HttpClient http, InstallState state)
         [property: JsonPropertyName("patch_size")] long PatchSize,
         [property: JsonPropertyName("url")] string Url);
 
+    private sealed record CopyEntry(
+        [property: JsonPropertyName("path")] string Path,
+        [property: JsonPropertyName("sha256")] string Sha256,
+        [property: JsonPropertyName("size")] long Size);
+
     private sealed record PatchManifest(
         [property: JsonPropertyName("from")] string From,
         [property: JsonPropertyName("to")] string To,
-        [property: JsonPropertyName("files")] List<PatchEntry> Files);
+        [property: JsonPropertyName("files")] List<PatchEntry> Files,
+        [property: JsonPropertyName("copy")] List<CopyEntry>? Copy);
 
-    private string StockGameDir => Path.Combine(state.ModlistDir, "Stock Game");
+    private string MarkerPath => Path.Combine(state.GameDir, ".sotr-game.json");
 
     public async Task ApplyAsync(FeedFile manifestFile, IProgress<InstallProgress> progress, CancellationToken ct)
     {
-        progress.Report(new("Oyun sürümü kontrol ediliyor", null, null));
+        if (IsComplete(manifestFile)) return;
+
+        progress.Report(new("Steam'deki Skyrim aranıyor", null, null));
+        var steamDir = SteamLocator.FindSkyrimSE()
+                       ?? throw new DirectoryNotFoundException("Steam'de Skyrim Special Edition bulunamadı. Oyunun Steam'de kurulu olması gerekiyor.");
         var manifest = await http.GetFromJsonAsync<PatchManifest>(manifestFile.Url, ct)
                        ?? throw new InvalidDataException("Yama listesi okunamadı.");
 
+        Directory.CreateDirectory(state.GameDir);
         var patchDir = Path.Combine(state.InstallRoot, "Tools", "patches");
         Directory.CreateDirectory(patchDir);
         var hpatchz = ExtractHpatchz();
 
-        for (var i = 0; i < manifest.Files.Count; i++)
+        var copies = manifest.Copy ?? [];
+        var total = manifest.Files.Count + copies.Count;
+        var done = 0;
+        var title = $"Oyun {manifest.To} olarak hazırlanıyor";
+        progress.Report(new(title, 0, $"0/{total}"));
+        void Step(string path)
         {
-            var entry = manifest.Files[i];
-            var target = Path.Combine(StockGameDir, entry.Path);
-            var label = $"{i + 1}/{manifest.Files.Count} · {entry.Path}";
-            progress.Report(new($"Oyun {manifest.To} sürümüne düşürülüyor", (double)i / manifest.Files.Count, label));
+            var n = Interlocked.Increment(ref done);
+            progress.Report(new(title, (double)n / total, $"{n}/{total} · {path}"));
+        }
 
-            if (!File.Exists(target))
-                throw new FileNotFoundException($"Oyun dosyası eksik: {entry.Path}. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
+        using var downloads = new SemaphoreSlim(4);
+        using var disk = new SemaphoreSlim(3);
 
-            var current = await Downloader.Sha256Async(target, ct);
-            if (current == entry.DstSha256) continue;
-            if (current != entry.SrcSha256)
-                throw new InvalidDataException(
-                    $"{entry.Path} beklenen {manifest.From} sürümünde değil. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
+        var copyTasks = copies.Select(async entry =>
+        {
+            await disk.WaitAsync(ct);
+            try { await CopyFileAsync(steamDir, entry, ct); }
+            finally { disk.Release(); }
+            Step(entry.Path);
+        });
+
+        var patchTasks = manifest.Files.Select(async entry =>
+        {
+            var source = Path.Combine(steamDir, entry.Path);
+            if (!File.Exists(source))
+                throw new FileNotFoundException($"Steam'deki oyunda dosya eksik: {entry.Path}. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
 
             var patch = Path.Combine(patchDir, Path.GetFileName(new Uri(entry.Url).LocalPath));
-            await Downloader.DownloadVerifiedAsync(http, new FeedFile(manifest.To, entry.Url, "", entry.PatchSize), patch, null, ct, verifyHash: false);
+            await downloads.WaitAsync(ct);
+            try { await Downloader.DownloadVerifiedAsync(http, new FeedFile(manifest.To, entry.Url, "", entry.PatchSize), patch, null, ct, verifyHash: false); }
+            finally { downloads.Release(); }
 
-            var output = target + ".new";
-            await RunHpatchzAsync(hpatchz, target, patch, output, ct);
-            if (await Downloader.Sha256Async(output, ct) != entry.DstSha256)
-            {
-                File.Delete(output);
-                throw new InvalidDataException($"{entry.Path} yamalanamadı (hash uyuşmuyor).");
-            }
-            File.Move(output, target, overwrite: true);
-            File.Delete(patch);
-        }
+            await disk.WaitAsync(ct);
+            try { await PatchFileAsync(hpatchz, manifest, entry, source, patch, ct); }
+            finally { disk.Release(); }
+            Step(entry.Path);
+        });
+
+        await Task.WhenAll(copyTasks.Concat(patchTasks));
+        File.WriteAllText(MarkerPath, JsonSerializer.Serialize(new { version = manifest.To, manifest = manifestFile.Sha256 }));
         progress.Report(new($"Oyun {manifest.To} sürümünde", 1, null));
     }
+
+    private bool IsComplete(FeedFile manifestFile)
+    {
+        try
+        {
+            if (!File.Exists(MarkerPath) || !File.Exists(Path.Combine(state.GameDir, "SkyrimSE.exe"))) return false;
+            using var doc = JsonDocument.Parse(File.ReadAllText(MarkerPath));
+            return doc.RootElement.GetProperty("manifest").GetString() == manifestFile.Sha256;
+        }
+        catch (Exception e) when (e is JsonException or IOException or KeyNotFoundException) { return false; }
+    }
+
+    private async Task CopyFileAsync(string steamDir, CopyEntry entry, CancellationToken ct)
+    {
+        var target = Path.Combine(state.GameDir, entry.Path);
+        if (File.Exists(target) && new FileInfo(target).Length == entry.Size && await Downloader.Sha256Async(target, ct) == entry.Sha256) return;
+
+        var source = Path.Combine(steamDir, entry.Path);
+        if (!File.Exists(source))
+            throw new FileNotFoundException($"Steam'deki oyunda dosya eksik: {entry.Path}. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        await using (var input = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 1 << 20, true))
+        await using (var output = new FileStream(target + ".new", FileMode.Create, FileAccess.Write, FileShare.None, 1 << 20, true))
+            await input.CopyToAsync(output, ct);
+        if (await Downloader.Sha256Async(target + ".new", ct) != entry.Sha256)
+        {
+            TryDelete(target + ".new");
+            throw new InvalidDataException($"{entry.Path} Steam'deki oyunda beklenen dosya değil. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
+        }
+        File.Move(target + ".new", target, overwrite: true);
+    }
+
+    private async Task PatchFileAsync(string hpatchz, PatchManifest manifest, PatchEntry entry, string source, string patch, CancellationToken ct)
+    {
+        var target = Path.Combine(state.GameDir, entry.Path);
+        var output = target + ".new";
+        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
+        try
+        {
+            await RunHpatchzAsync(hpatchz, source, patch, output, ct);
+        }
+        catch (InvalidOperationException)
+        {
+            // Steam copy is not 1.7.104: fine if it is already the target version, otherwise unusable.
+            TryDelete(output);
+            if (await Downloader.Sha256Async(source, ct) != entry.DstSha256)
+                throw new InvalidDataException(
+                    $"{entry.Path} Steam'de beklenen {manifest.From} sürümünde değil. Steam'de dosya bütünlüğünü doğrulayıp tekrar dene.");
+            File.Copy(source, output, overwrite: true);
+        }
+        if (await Downloader.Sha256Async(output, ct) != entry.DstSha256)
+        {
+            TryDelete(output);
+            throw new InvalidDataException($"{entry.Path} yamalanamadı (hash uyuşmuyor).");
+        }
+        File.Move(output, target, overwrite: true);
+        TryDelete(patch);
+    }
+
+    private static void TryDelete(string path) { try { File.Delete(path); } catch (IOException) { } }
 
     private static async Task RunHpatchzAsync(string hpatchz, string oldFile, string patch, string newFile, CancellationToken ct)
     {

@@ -9,12 +9,13 @@ public sealed record InstallProgress(string Phase, double? Fraction, string? Det
 
 /// <summary>
 /// Installs or updates the modlist with wabbajack-cli. All archives in the modlist use direct
-/// URLs (GitHub releases), so no Nexus account is needed; game files come from the player's
-/// Steam Skyrim and Wabbajack patches them down to the modlist's game version.
+/// URLs (GitHub releases), so no Nexus account is needed. The modlist carries no game files:
+/// the game folder is built separately by <see cref="Downgrader"/>.
 /// </summary>
 public sealed partial class GameInstaller(HttpClient http, InstallState state)
 {
-    public bool NeedsUpdate(Feed feed) => !state.IsInstalled || state.ModlistVersion != feed.Modlist.Version;
+    public bool NeedsUpdate(Feed feed) =>
+        !state.IsInstalled || state.ModlistVersion != feed.Modlist.Version || !File.Exists(Path.Combine(state.GameDir, "SkyrimSE.exe"));
 
     public async Task InstallAsync(Feed feed, IProgress<InstallProgress> progress, CancellationToken ct)
     {
@@ -27,6 +28,7 @@ public sealed partial class GameInstaller(HttpClient http, InstallState state)
 
         await RunWabbajackAsync(wabbajackFile, progress, ct);
         await new Downgrader(http, state).ApplyAsync(feed.Downgrade, progress, ct);
+        GameRunner.PointMo2AtGame(state);
 
         state.ModlistVersion = feed.Modlist.Version;
         state.Save();

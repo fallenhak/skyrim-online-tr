@@ -11,6 +11,7 @@ public sealed class InstallState
     [JsonPropertyName("wabbajackVersion")] public string? WabbajackVersion { get; set; }
 
     [JsonIgnore] public string ModlistDir => Path.Combine(InstallRoot, "Modlist");
+    [JsonIgnore] public string GameDir => Path.Combine(InstallRoot, "Game");
     [JsonIgnore] public string DownloadsDir => Path.Combine(InstallRoot, "Downloads");
     [JsonIgnore] public string WabbajackDir => Path.Combine(InstallRoot, "Tools", "Wabbajack");
     [JsonIgnore] public string Mo2Exe => Path.Combine(ModlistDir, "ModOrganizer.exe");

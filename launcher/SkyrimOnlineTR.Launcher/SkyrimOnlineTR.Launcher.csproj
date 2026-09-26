@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <AssemblyName>SkyrimOnlineTR</AssemblyName>
     <RootNamespace>SkyrimOnlineTR.Launcher</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Product>Skyrim Online TR</Product>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>

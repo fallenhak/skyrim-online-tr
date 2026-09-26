@@ -36,7 +36,7 @@ public partial class MainWindow : Window
         ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
 
         _pollTimer.Tick += async (_, _) => await CheckForUpdatesAsync(silent: true);
-        _gameWatch.Tick += (_, _) => { if (_mode == Mode.Running && !GameRunner.IsGameRunning()) { _gameWatch.Stop(); Refresh(); } };
+        _gameWatch.Tick += (_, _) => { if (_mode == Mode.Running && !GameRunner.IsGameRunning(_state)) { _gameWatch.Stop(); Refresh(); } };
         Loaded += async (_, _) => await StartupAsync();
         Closed += (_, _) => _snow.Stop();
     }
@@ -69,7 +69,7 @@ public partial class MainWindow : Window
         _ = UpdateServerStatusAsync(_feed.Server);
 
         // Self-update happens right away unless the player is mid-install or in game.
-        if (SelfUpdater.IsNewer(_feed.Launcher) && !_working && !GameRunner.IsGameRunning())
+        if (SelfUpdater.IsNewer(_feed.Launcher) && !_working && !GameRunner.IsGameRunning(_state))
         {
             await RunWorkAsync(async ct =>
             {
@@ -141,7 +141,7 @@ public partial class MainWindow : Window
         ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
         if (_working) return;
 
-        if (GameRunner.IsGameRunning()) SetMode(Mode.Running);
+        if (GameRunner.IsGameRunning(_state)) SetMode(Mode.Running);
         else if (_session is null) SetMode(Mode.Login);
         else if (_feed is null) SetMode(_state.IsInstalled ? Mode.Play : Mode.Offline);
         else if (!_state.IsInstalled) SetMode(Mode.Install);
@@ -213,7 +213,7 @@ public partial class MainWindow : Window
             GameRunner.Launch(_state, _feed, refreshed);
             await Task.Delay(TimeSpan.FromSeconds(8), ct);
         });
-        if (GameRunner.IsGameRunning())
+        if (GameRunner.IsGameRunning(_state))
         {
             SetMode(Mode.Running);
             _gameWatch.Start();

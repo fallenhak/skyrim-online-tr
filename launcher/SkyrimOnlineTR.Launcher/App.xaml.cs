@@ -10,7 +10,8 @@ public partial class App : Application
 
     protected override void OnStartup(StartupEventArgs e)
     {
-        _singleInstance = new Mutex(true, "SkyrimOnlineTR.Launcher.SingleInstance", out var first);
+        var mutexName = Environment.GetEnvironmentVariable("SOTR_HOME") is null ? "SkyrimOnlineTR.Launcher.SingleInstance" : "SkyrimOnlineTR.Launcher.Test";
+        _singleInstance = new Mutex(true, mutexName, out var first);
         if (!first)
         {
             MessageBox.Show("Skyrim Online TR launcher zaten açık.", "Skyrim Online TR");
