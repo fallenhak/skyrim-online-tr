@@ -7,6 +7,7 @@ on:
     push:
         branches:
           - main
+    workflow_dispatch:
 
 env:
     BUILD_TYPE: RelWithDebInfo
@@ -22,9 +23,6 @@ jobs:
             - ubuntu-vcpkg-deps
 
             # Distros that our contributors are likely to run
-            - ubuntu-2404
-            - ubuntu-2510  # latest non-LTS
-            - archlinux
 
             # TODO(#2280): return Debian, add Fedora
             # TODO(#2280): test gcc build, test build w/o ninja
