@@ -1303,7 +1303,7 @@ void ActionListener::OnWeaponHit(MpActor* aggressor,
       espm::GetData<espm::WEAP>(hitData.source, espmProvider).weapDNAM;
     float expectedAttackTime = (1.1 * (1 / weapDNAM->speed)) -
       (1.1 * (1 / weapDNAM->speed) * (weapDNAM->speed <= 0.75 ? 0.45 : 0.3));
-    spdlog::debug(
+    spdlog::warn(
       "OnWeaponHit - Target {0:x} is not available for attack due to fast "
       "attack speed. Weapon: {1:x}. Elapsed time: {2}. Expected attack time: "
       "{3}",

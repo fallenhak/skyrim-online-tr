@@ -33,7 +33,7 @@ export const applyMovement = (refr: ObjectReference, m: Movement, isMyClone?: bo
     return;
   }
 
-  let lookAt = null;
+  let lookAt: ObjectReference | null = null;
   if (m.lookAt) {
     try {
       lookAt = Game.findClosestActor(
@@ -45,6 +45,12 @@ export const applyMovement = (refr: ObjectReference, m: Movement, isMyClone?: bo
     } catch (e) {
       lookAt = null;
     }
+  }
+
+  if (!lookAt && m.isWeapDrawn) {
+    // Remote players send no lookAt; aim at a point along their pitch/heading
+    // so bows and head tracking follow where they actually look
+    lookAt = getAimMarker(ac, m);
   }
 
   if (lookAt) {
@@ -66,6 +72,32 @@ export const applyMovement = (refr: ObjectReference, m: Movement, isMyClone?: bo
   applyHealthPercentage(ac, m.healthPercentage);
 
   SpApiInteractor.getControllerInstance().emitter.emit("applyDeathStateEvent", { actor: ac, isDead: m.isDead });
+};
+
+const kXMarker = 0x3b;
+const kAimDistance = 2000;
+const kEyeHeight = 110;
+const aimMarkers = new Map<number, number>();
+
+const getAimMarker = (ac: Actor, m: Movement): ObjectReference | null => {
+  let marker = ObjectReference.from(Game.getFormEx(aimMarkers.get(ac.getFormID()) || 0));
+  if (!marker) {
+    marker = ac.placeAtMe(Game.getFormEx(kXMarker), 1, false, false);
+    if (!marker) {
+      return null;
+    }
+    aimMarkers.set(ac.getFormID(), marker.getFormID());
+  }
+
+  // Skyrim: positive AngleX pitches down, AngleZ 0 faces +Y
+  const pitch = (m.rot[0] / 180) * Math.PI;
+  const heading = (m.rot[2] / 180) * Math.PI;
+  marker.setPosition(
+    m.pos[0] + Math.sin(heading) * Math.cos(pitch) * kAimDistance,
+    m.pos[1] + Math.cos(heading) * Math.cos(pitch) * kAimDistance,
+    m.pos[2] + kEyeHeight - Math.sin(pitch) * kAimDistance,
+  );
+  return marker;
 };
 
 const keepOffsetFromActor = (ac: Actor, m: Movement) => {
