@@ -217,6 +217,10 @@ const onProgEvent = (actor, msg) => {
     if (!prog) {
       prog = newProg(msg.skills);
       console.log(`[sotr-prog] ${actorName(actor)} için ilerleme kaydı açıldı`);
+      // Eşit başlangıç (Daedric Online gibi): paçavra, kazma, balta, 50 altın, biraz yiyecek
+      try {
+        addToInventory(actor, [[0x3c9fe, 1], [0x3ca00, 1], [0xe3c16, 1], [0x2f2f4, 1], [0xf, 50], [0x65c97, 2], [0x64b2e, 2], [0x65c9f, 1]]);
+      } catch (e) { console.log('[sotr-prog] başlangıç eşyası verilemedi', e && e.message); }
     }
     saveProg(actor, prog);
     return;

@@ -16,7 +16,7 @@ const playerInfo = (p) => {
   try { hp = mp.get(p, 'percentages').health; } catch (e) { /* yok */ }
   try { dead = mp.get(p, 'isDead'); } catch (e) { /* yok */ }
   return {
-    id: p, name: actorName(p), lvl: prog.lvl || 1, xp: Math.round(prog.xp || 0), need: xpForLevel(prog.lvl || 1),
+    id: p, name: tagOf(p) + ' ' + actorName(p), lvl: prog.lvl || 1, xp: Math.round(prog.xp || 0), need: xpForLevel(prog.lvl || 1),
     pp: prog.pp || 0, sp: prog.sp || 0, hp: Math.round(hp * 100), dead,
   };
 };

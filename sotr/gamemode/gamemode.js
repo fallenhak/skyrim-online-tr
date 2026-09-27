@@ -468,6 +468,10 @@ const onProgEvent = (actor, msg) => {
     if (!prog) {
       prog = newProg(msg.skills);
       console.log(`[sotr-prog] ${actorName(actor)} için ilerleme kaydı açıldı`);
+      // Eşit başlangıç (Daedric Online gibi): paçavra, kazma, balta, 50 altın, biraz yiyecek
+      try {
+        addToInventory(actor, [[0x3c9fe, 1], [0x3ca00, 1], [0xe3c16, 1], [0x2f2f4, 1], [0xf, 50], [0x65c97, 2], [0x64b2e, 2], [0x65c9f, 1]]);
+      } catch (e) { console.log('[sotr-prog] başlangıç eşyası verilemedi', e && e.message); }
     }
     saveProg(actor, prog);
     return;
@@ -542,7 +546,7 @@ const playerInfo = (p) => {
   try { hp = mp.get(p, 'percentages').health; } catch (e) { /* yok */ }
   try { dead = mp.get(p, 'isDead'); } catch (e) { /* yok */ }
   return {
-    id: p, name: actorName(p), lvl: prog.lvl || 1, xp: Math.round(prog.xp || 0), need: xpForLevel(prog.lvl || 1),
+    id: p, name: tagOf(p) + ' ' + actorName(p), lvl: prog.lvl || 1, xp: Math.round(prog.xp || 0), need: xpForLevel(prog.lvl || 1),
     pp: prog.pp || 0, sp: prog.sp || 0, hp: Math.round(hp * 100), dead,
   };
 };
