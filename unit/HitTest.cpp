@@ -211,7 +211,8 @@ TEST_CASE("checking weapon cooldown", "[Hit]")
   eq.inv.entries.push_back(Inventory::Entry(80254, 1, kExtraWornTrue));
   ac.SetEquipment(eq);
 
-  auto past = std::chrono::steady_clock::now() - 300ms;
+  // Below the 0.25 s anti-macro floor
+  auto past = std::chrono::steady_clock::now() - 200ms;
 
   ac.SetLastHitTime(0xff000000, past);
   p.Messages().clear();

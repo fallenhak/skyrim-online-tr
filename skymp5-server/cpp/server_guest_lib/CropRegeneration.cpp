@@ -70,7 +70,9 @@ float CropHealthRegeneration(float newAttributeValue,
 {
   const BaseActorValues baseValues = GetValues(actor);
   const ActorValues& actorValues = actor->GetActorValues();
-  const float rate = std::max(baseValues.healRate, actorValues.healRate);
+  // Passive health regeneration is disabled (see GetBaseActorValues); the
+  // rate stored in old change forms must not re-enable it.
+  const float rate = baseValues.healRate;
   const float rateMult =
     std::max(baseValues.healRateMult, actorValues.healRateMult);
   const float oldPercentage = actorValues.healthPercentage;

@@ -28,7 +28,7 @@ TEST_CASE("GetBaseActorValues works correctly", "[GetBaseActorValues]")
   REQUIRE(baseValues.health == 100.f);
   REQUIRE(baseValues.stamina == 100.f);
   REQUIRE(baseValues.magicka == 100.f);
-  REQUIRE(baseValues.healRate == 0.7f);
+  REQUIRE(baseValues.healRate == 0.f);
   REQUIRE(baseValues.staminaRate == 5.f);
   REQUIRE(baseValues.magickaRate == 3.f);
 }

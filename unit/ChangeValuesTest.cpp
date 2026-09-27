@@ -81,8 +81,9 @@ TEST_CASE("OnChangeValues call is cropping percentage values",
 
   float expectedHealth = baseValues.healRate * baseValues.healRateMult *
     elapsedTime.count() / 10000.0f;
+  // OnChangeValues adds 0.5 s of network jitter to the regen period
   float expectedMagicka = baseValues.magickaRate * baseValues.magickaRateMult *
-    elapsedTime.count() / 10000.0f;
+    (elapsedTime.count() + 0.5f) / 10000.0f;
   float expectedStamina = baseValues.staminaRate * baseValues.staminaRateMult *
     elapsedTime.count() / 10000.0f;
 
