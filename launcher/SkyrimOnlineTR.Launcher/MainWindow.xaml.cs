@@ -22,7 +22,6 @@ public partial class MainWindow : Window
     private readonly InstallState _state = InstallState.Load();
     private readonly DispatcherTimer _pollTimer = new() { Interval = UpdateCheckInterval };
     private readonly DispatcherTimer _gameWatch = new() { Interval = TimeSpan.FromSeconds(3) };
-    private readonly Snowfall _snow;
 
     private Feed? _feed;
     private Session? _session;
@@ -33,11 +32,9 @@ public partial class MainWindow : Window
     {
         InitializeComponent();
         _http.DefaultRequestHeaders.UserAgent.ParseAdd($"SkyrimOnlineTR-Launcher/{LauncherConfig.CurrentVersion}");
-        _snow = new Snowfall(SnowLayer);
         LauncherVersionText.Text = LauncherConfig.CurrentVersion.ToString(3);
         InstallDirText.Text = _state.InstallRoot;
-        ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
-        Rivets.ItemsSource = Enumerable.Range(0, 16);
+        HomeModlistText.Text = ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
         BuildResolutionChoices();
         LoadDisplaySettings();
         _ = UpdateCacheSizeAsync();
@@ -45,14 +42,14 @@ public partial class MainWindow : Window
         _pollTimer.Tick += async (_, _) => await CheckForUpdatesAsync(silent: true);
         _gameWatch.Tick += (_, _) => { if (_mode == Mode.Running && !GameRunner.IsGameRunning(_state)) { _gameWatch.Stop(); Refresh(); } };
         Loaded += async (_, _) => await StartupAsync();
-        Closed += (_, _) => _snow.Stop();
     }
 
     // ---------- Startup ----------
 
     private async Task StartupAsync()
     {
-        SetPhase("Diyar ile bağlantı kuruluyor", null, null);
+        SetPhase("Sunucuya bağlanılıyor", null, null);
+        Progress.IsIndeterminate = true;
         await CheckForUpdatesAsync(silent: false);
         await RestoreSessionAsync();
         Refresh();
@@ -90,7 +87,9 @@ public partial class MainWindow : Window
     private void ShowFeed(Feed feed)
     {
         var news = feed.News ?? [];
-        HomeNewsList.ItemsSource = news.Take(2).ToList();
+        HomeLead.DataContext = news.FirstOrDefault();
+        HomeLead.Visibility = news.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        HomeNewsList.ItemsSource = news.Skip(1).Take(2).ToList();
         NewsList.ItemsSource = news;
         HomeNewsEmpty.Visibility = NewsEmpty.Visibility = news.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
 
@@ -127,7 +126,7 @@ public partial class MainWindow : Window
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException) { }
         }
         var online = ms is not null;
-        ServerDot.Fill = ServerDot2.Fill = (Brush)FindResource(online ? "Lichen" : "Rust");
+        ServerDot.Fill = ServerDot2.Fill = (Brush)FindResource(online ? "Online" : "Offline");
         ServerStatus.Text = ServerStatus2.Text = online ? "Çevrimiçi" : "Ulaşılamıyor";
         ServerPing.Text = online ? $"{ms} ms" : "";
         ServerPing2.Text = online ? $"Gecikme: {ms} ms" : "Sunucu yanıt vermedi. Birazdan tekrar dene; sorun sürerse Discord'dan haber ver.";
@@ -173,7 +172,7 @@ public partial class MainWindow : Window
 
     private void Refresh()
     {
-        ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
+        HomeModlistText.Text = ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
         if (_working) return;
 
         if (GameRunner.IsGameRunning(_state)) SetMode(Mode.Running);
@@ -198,6 +197,7 @@ public partial class MainWindow : Window
             _ => ("Bekle", false, PhaseText.Text, DetailText.Text),
         };
         SetPhase(phase, null, detail);
+        ShowBandFinished();
         InstallDirButton.IsEnabled = mode is Mode.Login or Mode.Install;
         RepairButton.IsEnabled = _feed is not null && _state.IsInstalled && mode is Mode.Play or Mode.Update;
         ClearCacheButton.IsEnabled = mode is not Mode.Running;
@@ -266,7 +266,8 @@ public partial class MainWindow : Window
         ActionButton.IsEnabled = false;
         ActionButton.Content = "Bekle";
         RepairButton.IsEnabled = ClearCacheButton.IsEnabled = false;
-        Progress.Visibility = Visibility.Visible;
+        Progress.BeginAnimation(WovenBand.ValueProperty, null);
+        Progress.Value = 0;
         Progress.IsIndeterminate = true;
         try
         {
@@ -283,12 +284,29 @@ public partial class MainWindow : Window
         }
         finally
         {
-            Progress.Visibility = Visibility.Hidden;
             PercentText.Text = "";
         }
     }
 
     // ---------- Progress ----------
+
+    private bool _bandWoven;
+
+    /// <summary>At rest the band is fully woven. The first time, it weaves itself in once.</summary>
+    private void ShowBandFinished()
+    {
+        Progress.IsIndeterminate = false;
+        if (_bandWoven) { Progress.Value = 1; return; }
+        _bandWoven = true;
+        var from = Progress.Value;
+        Progress.Value = 1;
+        if (SystemParameters.ClientAreaAnimation)
+            Progress.BeginAnimation(WovenBand.ValueProperty, new DoubleAnimation(from, 1, TimeSpan.FromMilliseconds(1100))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut },
+                FillBehavior = FillBehavior.Stop,
+            });
+    }
 
     private void SetPhase(string phase, double? fraction, string? detail)
     {
@@ -302,7 +320,7 @@ public partial class MainWindow : Window
         }
         else
         {
-            Progress.IsIndeterminate = true;
+            if (_working) Progress.IsIndeterminate = true;
             PercentText.Text = "";
         }
     }
@@ -324,6 +342,13 @@ public partial class MainWindow : Window
         if (Pages.FindName(name) is FrameworkElement shown && SystemParameters.ClientAreaAnimation)
             shown.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(160)));
         if (name == "PageSettings") _ = UpdateCacheSizeAsync();
+    }
+
+    private void OnGoTo(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string name }) return;
+        foreach (var item in Nav.Children.OfType<RadioButton>())
+            if (item.Tag as string == name) item.IsChecked = true;
     }
 
     private async void OnRefreshServer(object sender, RoutedEventArgs e)
