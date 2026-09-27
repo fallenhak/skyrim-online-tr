@@ -36,7 +36,6 @@ jobs:
           - name: Checkout
             uses: actions/checkout@v6
             with:
-              repository: skyrim-multiplayer/skymp
               token: ${{ secrets.combined_server_token || github.token }}
               submodules: recursive
               fetch-depth: 0
