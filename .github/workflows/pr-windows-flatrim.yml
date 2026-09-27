@@ -2,7 +2,7 @@ name: PR Windows Flatrim (AE/SE)
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, feat/progression ]
   pull_request:
     branches: [ main ]
   schedule:

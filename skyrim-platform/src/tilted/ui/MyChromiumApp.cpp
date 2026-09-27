@@ -306,5 +306,11 @@ void MyChromiumApp::RunTasks()
 void MyChromiumApp::OnBeforeCommandLineProcessing(
   const CefString& aProcessType, CefRefPtr<CefCommandLine> aCommandLine)
 {
+  // Sesli sohbet (WebRTC): CEF 108'de izin işleyicisi yok, mikrofon erişimi
+  // bu anahtarlarla izin sorulmadan açılır.
+  aCommandLine->AppendSwitch("enable-media-stream");
+  aCommandLine->AppendSwitch("use-fake-ui-for-media-stream");
+  aCommandLine->AppendSwitchWithValue("autoplay-policy",
+                                      "no-user-gesture-required");
 }
 }
