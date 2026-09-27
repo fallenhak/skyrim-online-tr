@@ -57,6 +57,7 @@ register('sotrVoice', () => mp.makeProperty('sotrVoice', ownerOnly(showOnce('sot
   ctx.sp.browser.setVisible(true);
   ctx.sp.browser.executeJavaScript('(' + ${JSON.stringify(sotrVoicePanel.toString())} + ')(' + JSON.stringify({ url: v.url, token: v.token }) + ')');
 `))));
+register('sotrEmote', () => mp.makeProperty('sotrEmote', ownerOnly(showOnce('sotrEmoteSeq', 'ctx.sp.Debug.sendAnimationEvent(ctx.sp.Game.getPlayer(), v.anim);'))));
 register('sotrBonus',() => mp.makeProperty('sotrBonus', ownerOnly('')));
 
 console.log(`[sotr] gamemode yüklendi: ${familySummary().length} yaratık ailesi, ${SKILLS.length} beceri`);

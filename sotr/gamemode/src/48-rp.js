@@ -24,8 +24,15 @@ const pidOf = (actor) => {
 const tagOf = (actor) => `#${pidOf(actor)}`;
 const chatName = (actor) => `${tagOf(actor)} ${actorName(actor)}`;
 
+const welcomed = new Set();
 every(2000, () => {
   for (const actor of onlinePlayers()) {
+    if (!welcomed.has(actor)) {
+      welcomed.add(actor);
+      setTimeout(() => {
+        deliver(actor, 'sys', `Skyrim Online TR'ye hoş geldin, ${tagOf(actor)}! Sohbet: Enter · Sesli: V (bas-konuş), B (fısıltı/normal/bağırma) · Beceri puanları: K · Komutlar: /yardim`);
+      }, 8000);
+    }
     const want = `${tagOf(actor)}  ${actorName(actor)}`;
     try { if (mp.get(actor, 'sotrTag') !== want) mp.set(actor, 'sotrTag', want); } catch (e) { /* yoksay */ }
   }
@@ -44,6 +51,7 @@ const near = (a, b, range) => {
   return Math.hypot(pa[0] - pb[0], pa[1] - pb[1], pa[2] - pb[2]) <= range;
 };
 
+const CHAT_LOG = process.cwd() + '/sotr-chat.log';
 let chatSeq = 0;
 const chatBox = new Map(); // actor → son mesajlar
 const deliver = (actor, kind, text) => {
@@ -58,9 +66,24 @@ const broadcast = (from, kind, text, range) => {
     if (range === Infinity || near(from, p, range)) deliver(p, kind, text);
   }
   console.log(`[sotr-chat] ${text}`);
+  try { fs.appendFileSync(CHAT_LOG, `${new Date().toISOString()} ${from.toString(16)} ${text}
+`); } catch (e) { /* yoksay */ }
 };
 
-const HELP = 'Komutlar: yazı = konuş · /f fısılda · /s bağır · /me eylem · /do ortam · /b yerel OOC · /ooc genel OOC · /zar [yüz sayısı]';
+// Emote: [animasyon olayı, /me metni]
+const EMOTES = {
+  selam: ['IdleWave', 'el sallar.'],
+  alkis: ['IdleApplaud2', 'alkışlar.'],
+  gul: ['IdleLaugh', 'kahkaha atar.'],
+  selamdur: ['IdleSalute', 'selam durur.'],
+  dua: ['IdlePray', 'dua eder.'],
+  gergin: ['IdleNervous', 'gergin görünür.'],
+  otur: ['IdleSitCrossLeggedEnter', 'yere bağdaş kurup oturur.'],
+  ter: ['IdleWipeBrow', 'alnının terini siler.'],
+  incele: ['IdleStudy', 'etrafı dikkatle inceler.'],
+  dur: ['IdleForceDefaultState', ''],
+};
+const HELP = 'Komutlar: yazı = konuş · /f fısılda · /s bağır · /me eylem · /do ortam · /b yerel OOC · /ooc genel OOC · /zar [yüz sayısı] · /e emote (/e selam, /e otur, /e dur) · Ses: V bas-konuş, B mod';
 
 const onChat = (actor, raw) => {
   const text = `${raw || ''}`.replace(/[<>]/g, '').trim().slice(0, 300);
@@ -93,6 +116,13 @@ const onChat = (actor, raw) => {
       const sides = Math.max(2, Math.min(1000, parseInt(rest, 10) || 20));
       const r = 1 + Math.floor(Math.random() * sides);
       broadcast(actor, 'roll', `🎲 ${who} zar attı (1-${sides}): ${r}`, RANGE.say);
+      return;
+    }
+    case 'e': case 'emote': {
+      const em = EMOTES[rest.toLowerCase()];
+      if (!em) { deliver(actor, 'sys', 'Emote listesi: ' + Object.keys(EMOTES).join(', ') + ' (örnek: /e selam)'); return; }
+      try { mp.set(actor, 'sotrEmote', { seq: ++chatSeq, anim: em[0] }); } catch (e) { /* yoksay */ }
+      if (em[1]) broadcast(actor, 'me', `* ${who} ${em[1]}`, RANGE.say);
       return;
     }
     default:
