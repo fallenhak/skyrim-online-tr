@@ -111,16 +111,16 @@ void AnimationSystem::InitAdditionalCallbacks()
       "JumpStandingStart",
       [](MpActor* actor) {
         constexpr float defaultModifier = 10.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "JumpDirectionalStart",
       [](MpActor* actor) {
         constexpr float defaultModifier = 15.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
@@ -138,8 +138,8 @@ void AnimationSystem::InitAdditionalCallbacks()
           HandleAttackAnim(actor, defaultModifier);
         } else {
           constexpr float defaultModifier = 40.f;
-          actor->DamageActorValueWithoutSync(
-            espm::ActorValue::Stamina, defaultModifier);
+          actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                             defaultModifier);
         }
       },
     },
@@ -154,8 +154,8 @@ void AnimationSystem::InitAdditionalCallbacks()
       "SneakSprintStartRoll",
       [](MpActor* actor) {
         constexpr float defaultModifier = 15.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
@@ -169,72 +169,72 @@ void AnimationSystem::InitAdditionalCallbacks()
       "attackPowerStartInPlace",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStartBackward",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStartLeft",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStartRight",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStartDualWield",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStartForward",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStart_2HWSprint",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackStartSprint",
       [](MpActor* actor) {
         constexpr float defaultModifier = 15.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
     {
       "attackPowerStart_2HMSprint",
       [](MpActor* actor) {
         constexpr float defaultModifier = 30.f;
-        actor->DamageActorValueWithoutSync(
-          espm::ActorValue::Stamina, defaultModifier);
+        actor->DamageActorValueWithoutSync(espm::ActorValue::Stamina,
+                                           defaultModifier);
       },
     },
 
