@@ -19,7 +19,9 @@
 #include "script_objects/EspmGameObject.h"
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <map>
 #include <spdlog/spdlog.h>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -683,8 +685,8 @@ void ActionListener::OnHostAttempt(const RawMessageData& rawMsgData,
   if (hoster == 0 || !lastRemoteUpdate ||
       std::chrono::system_clock::now() - *lastRemoteUpdate >
         hostResetTimeout) {
-    partOne.GetLogger().info("Hoster changed from {0:x} to {0:x}", prevHoster,
-                             me->GetFormId());
+    partOne.GetLogger().info("Hoster of {2:x} changed from {0:x} to {1:x}",
+                             prevHoster, me->GetFormId(), remoteId);
     hoster = me->GetFormId();
     remote.UpdateHoster(hoster);
 
@@ -867,6 +869,34 @@ float TakeRestoreAllowance(MpActor& actor, espm::ActorValue av,
   allowance.lump[idx] =
     std::max(0.f, allowance.lump[idx] - granted * maxValue);
   return granted;
+}
+
+// Seconds of concentration damage the latest hit stands for. The first hit of
+// a stream and hits after a pause count as one nominal tick.
+constexpr float kNominalConcentrationTick = 0.2f;
+constexpr float kMaxConcentrationTick = 0.5f;
+std::map<std::tuple<uint32_t, uint32_t, uint32_t>,
+         std::chrono::steady_clock::time_point>
+  g_lastConcentrationHit;
+
+float ConsumeConcentrationTick(uint32_t casterId, uint32_t targetId,
+                               uint32_t spellId)
+{
+  const auto now = std::chrono::steady_clock::now();
+  auto [it, inserted] = g_lastConcentrationHit.try_emplace(
+    std::make_tuple(casterId, targetId, spellId), now);
+  float seconds = kNominalConcentrationTick;
+  if (!inserted) {
+    seconds = std::chrono::duration<float>(now - it->second).count();
+    if (seconds > kMaxConcentrationTick) {
+      seconds = kNominalConcentrationTick;
+    }
+    it->second = now;
+  }
+  if (g_lastConcentrationHit.size() > 4096) {
+    g_lastConcentrationHit.clear();
+  }
+  return seconds;
 }
 
 void StopRestoreConcentration(uint32_t casterId)
@@ -1377,6 +1407,20 @@ void ActionListener::OnSpellHit(MpActor* aggressor,
     partOne.CalculateDamage(*aggressor, *targetActorPtr, spellCastData);
   damage = damage <= 0.f ? 0.f : damage;
 
+  // Concentration spells (Flames, Frostbite, Sparks) report a hit every few
+  // frames, but their magnitude is per second. Scale by the real time since
+  // the previous tick so spamming hits cannot multiply the damage.
+  float tickSeconds = -1.f;
+  const auto spellData =
+    espm::GetData<espm::SPEL>(hitData.source, &partOne.worldState);
+  if (spellData.spellItem &&
+      spellData.spellItem->castType == espm::SPEL::CastType::Concentration) {
+    tickSeconds = ConsumeConcentrationTick(
+      aggressor->GetFormId(), targetActorPtr->GetFormId(), hitData.source);
+    damage *= tickSeconds;
+  }
+
+  const float healthPercentageBefore = targetActorValues.healthPercentage;
   targetActorValues.healthPercentage = CalculateCurrentHealthPercentage(
     *targetActorPtr, damage, targetActorValues.healthPercentage, nullptr);
 
@@ -1387,9 +1431,11 @@ void ActionListener::OnSpellHit(MpActor* aggressor,
                                     kHealthAvFilter);
 
   spdlog::info("OnSpellHit - Target {0:x} is hit by {1:x} spell on {2} "
-               "damage. By caster: {3:x})",
+               "damage. By caster: {3:x}, concentration tick: {4}s, "
+               "percentage was: {5}, percentage now: {6})",
                spellCastData.target, spellCastData.spell, damage,
-               spellCastData.caster);
+               spellCastData.caster, tickSeconds, healthPercentageBefore,
+               targetActorValues.healthPercentage);
 }
 
 void ActionListener::OnWeaponHit(MpActor* aggressor,
@@ -1560,9 +1606,11 @@ void ActionListener::OnWeaponHit(MpActor* aggressor,
 
   spdlog::debug(
     "OnWeaponHit - Target {0:x} is hit by {1} damage. Percentage was: {3}, "
-    "percentage now: {2}, base health: {4})",
+    "percentage now: {2}, base health: {4}. Aggressor: {5:x}, weapon: {6:x}, "
+    "unarmed: {7}, power: {8}, blocked: {9})",
     hitData.target, damage, currentActorValues.healthPercentage,
-    healthPercentage, outBaseHealth);
+    healthPercentage, outBaseHealth, hitData.aggressor, hitData.source,
+    isUnarmed, hitData.isPowerAttack, hitData.isHitBlocked);
 }
 
 void ActionListener::SendPapyrusOnHitEvent(MpActor* aggressor,
