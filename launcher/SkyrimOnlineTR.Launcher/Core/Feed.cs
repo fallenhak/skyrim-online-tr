@@ -15,12 +15,24 @@ public sealed record FeedServer(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("host")] string Host,
     [property: JsonPropertyName("port")] int Port,
-    [property: JsonPropertyName("statusUrl")] string? StatusUrl);
+    [property: JsonPropertyName("statusUrl")] string? StatusUrl,
+    [property: JsonPropertyName("discordUrl")] string? DiscordUrl = null);
 
 public sealed record FeedNews(
     [property: JsonPropertyName("title")] string Title,
     [property: JsonPropertyName("body")] string Body,
     [property: JsonPropertyName("date")] string Date);
+
+public sealed record FeedPatchNote(
+    [property: JsonPropertyName("version")] string Version,
+    [property: JsonPropertyName("date")] string Date,
+    [property: JsonPropertyName("changes")] List<string> Changes);
+
+public sealed record FeedMod(
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("version")] string Version,
+    [property: JsonPropertyName("author")] string? Author,
+    [property: JsonPropertyName("about")] string? About);
 
 public sealed record Feed(
     [property: JsonPropertyName("launcher")] FeedFile Launcher,
@@ -28,7 +40,10 @@ public sealed record Feed(
     [property: JsonPropertyName("wabbajack")] FeedFile Wabbajack,
     [property: JsonPropertyName("downgrade")] FeedFile Downgrade,
     [property: JsonPropertyName("server")] FeedServer Server,
-    [property: JsonPropertyName("news")] List<FeedNews>? News)
+    [property: JsonPropertyName("news")] List<FeedNews>? News,
+    [property: JsonPropertyName("patchNotes")] List<FeedPatchNote>? PatchNotes = null,
+    [property: JsonPropertyName("mods")] List<FeedMod>? Mods = null,
+    [property: JsonPropertyName("rules")] List<string>? Rules = null)
 {
     public static async Task<Feed> FetchAsync(HttpClient http, CancellationToken ct)
     {

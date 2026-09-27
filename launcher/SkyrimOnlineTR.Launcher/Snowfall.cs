@@ -19,7 +19,7 @@ public sealed class Snowfall
     private readonly Random _random = new();
     private TimeSpan _last;
 
-    public Snowfall(Canvas canvas, int count = 90)
+    public Snowfall(Canvas canvas, int count = 50)
     {
         _canvas = canvas;
         for (var i = 0; i < count; i++) _flakes.Add(Create(initial: true));
@@ -33,7 +33,7 @@ public sealed class Snowfall
         {
             Width = size,
             Height = size,
-            Fill = new SolidColorBrush(Color.FromArgb((byte)(70 + _random.Next(120)), 235, 240, 248)),
+            Fill = new SolidColorBrush(Color.FromArgb((byte)(40 + _random.Next(90)), 235, 240, 248)),
         };
         if (size > 3.2) shape.Effect = new System.Windows.Media.Effects.BlurEffect { Radius = 1.5 };
         _canvas.Children.Add(shape);

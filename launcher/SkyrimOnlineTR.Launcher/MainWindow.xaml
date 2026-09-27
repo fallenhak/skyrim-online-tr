@@ -1,190 +1,427 @@
 <Window x:Class="SkyrimOnlineTR.Launcher.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Skyrim Online TR" Width="1080" Height="640" ResizeMode="CanMinimize"
+        Title="Skyrim Online TR" Width="1180" Height="720" ResizeMode="CanMinimize"
         WindowStyle="None" AllowsTransparency="True" Background="Transparent"
         WindowStartupLocation="CenterScreen" UseLayoutRounding="True"
-        TextOptions.TextFormattingMode="Display">
+        TextOptions.TextFormattingMode="Display" Language="tr-TR">
 
-    <Border CornerRadius="10" BorderBrush="#553F2E14" BorderThickness="1" ClipToBounds="True">
-        <Border.Background>
-            <RadialGradientBrush Center="0.3,0.25" GradientOrigin="0.3,0.25" RadiusX="1.1" RadiusY="1.1">
-                <GradientStop Color="#2A2620" Offset="0"/>
-                <GradientStop Color="#15130F" Offset="0.45"/>
-                <GradientStop Color="#080706" Offset="1"/>
-            </RadialGradientBrush>
-        </Border.Background>
+    <Window.Resources>
+        <!-- Small iron rivet -->
+        <DrawingBrush x:Key="RivetBrush" Stretch="Uniform">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Geometry="M 0,5 A 5,5 0 1 1 10,5 A 5,5 0 1 1 0,5 Z">
+                        <GeometryDrawing.Brush>
+                            <RadialGradientBrush GradientOrigin="0.35,0.3" Center="0.4,0.35" RadiusX="0.7" RadiusY="0.7">
+                                <GradientStop Color="#7A838A" Offset="0"/>
+                                <GradientStop Color="#3A4045" Offset="0.6"/>
+                                <GradientStop Color="#1A1D20" Offset="1"/>
+                            </RadialGradientBrush>
+                        </GeometryDrawing.Brush>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
 
-        <Grid x:Name="Root" MouseLeftButtonDown="OnDrag">
-            <!-- Moon glow -->
-            <Ellipse Width="520" Height="520" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,-180,-80,0" IsHitTestVisible="False">
-                <Ellipse.Fill>
-                    <RadialGradientBrush>
-                        <GradientStop Color="#1FD8E2F0" Offset="0"/>
-                        <GradientStop Color="#00D8E2F0" Offset="1"/>
-                    </RadialGradientBrush>
-                </Ellipse.Fill>
-            </Ellipse>
+        <!-- Diamond used as a list marker, cut like the knot ends on Nordic stones -->
+        <Geometry x:Key="Diamond">M 0,4 L 4,0 L 8,4 L 4,8 Z</Geometry>
+    </Window.Resources>
 
-            <!-- Mountain ranges, far to near -->
-            <Viewbox Stretch="Fill" VerticalAlignment="Bottom" Height="360" IsHitTestVisible="False">
-                <Canvas Width="1080" Height="360">
-                    <Path Fill="#1B1F26" Opacity="0.85"
-                          Data="M0,210 L90,150 L150,175 L240,90 L300,130 L380,60 L450,120 L520,95 L600,150 L690,70 L760,125 L850,85 L930,140 L1000,105 L1080,150 L1080,360 L0,360 Z"/>
-                    <Path Fill="#EEF2F8" Opacity="0.10"
-                          Data="M240,90 L262,106 L250,112 L232,100 Z M380,60 L404,80 L386,84 L368,72 Z M690,70 L716,92 L696,96 L676,84 Z M850,85 L872,104 L852,106 L838,96 Z"/>
-                    <Path Fill="#13151A"
-                          Data="M0,260 L70,215 L160,245 L260,170 L330,215 L420,180 L510,230 L600,175 L700,235 L790,190 L880,240 L980,200 L1080,240 L1080,360 L0,360 Z"/>
-                    <Path Fill="#0B0B0D"
-                          Data="M0,305 L110,270 L220,300 L330,262 L460,300 L560,275 L690,310 L820,270 L950,300 L1080,280 L1080,360 L0,360 Z"/>
-                </Canvas>
-            </Viewbox>
+    <Grid x:Name="Frame">
+        <!-- The window is a stone slab with chamfered corners -->
+        <Grid.Clip>
+            <PathGeometry Figures="M 16,0 L 1164,0 L 1180,16 L 1180,704 L 1164,720 L 16,720 L 0,704 L 0,16 Z"/>
+        </Grid.Clip>
 
-            <!-- Snow -->
-            <Canvas x:Name="SnowLayer" IsHitTestVisible="False" ClipToBounds="True"/>
+        <Rectangle Fill="{StaticResource Soot}"/>
+        <Rectangle Fill="{StaticResource StoneTexture}"/>
 
-            <!-- Bottom shade so text stays readable -->
-            <Border VerticalAlignment="Bottom" Height="230" IsHitTestVisible="False">
-                <Border.Background>
-                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                        <GradientStop Color="#00060505" Offset="0"/>
-                        <GradientStop Color="#E0060505" Offset="1"/>
-                    </LinearGradientBrush>
-                </Border.Background>
-            </Border>
+        <!-- Far mountains, only a shape in the stone -->
+        <Viewbox Stretch="Fill" VerticalAlignment="Bottom" Height="330" Margin="0,0,0,110" IsHitTestVisible="False">
+            <Canvas Width="1180" Height="330">
+                <Path Fill="#232729" Data="M0,220 L110,160 L170,185 L270,95 L330,138 L420,62 L500,126 L575,98 L660,156 L760,72 L835,130 L930,88 L1015,146 L1095,108 L1180,150 L1180,330 L0,330 Z"/>
+                <Path Fill="#3A4247" Opacity="0.55" Data="M270,95 L294,112 L282,118 L262,106 Z M420,62 L446,84 L428,88 L408,76 Z M760,72 L788,96 L766,100 L744,88 Z M930,88 L954,108 L932,110 L916,100 Z"/>
+                <Path Fill="#1E2224" Data="M0,270 L80,228 L180,256 L290,182 L360,226 L460,190 L560,242 L660,186 L770,246 L870,200 L970,250 L1080,212 L1180,248 L1180,330 L0,330 Z"/>
+            </Canvas>
+        </Viewbox>
 
-            <Grid Margin="36,20,36,28">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
+        <Canvas x:Name="SnowLayer" IsHitTestVisible="False" ClipToBounds="True"/>
 
-                <!-- Header -->
-                <Grid Grid.Row="0">
-                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-                        <Image Source="pack://application:,,,/Assets/app.ico" Width="30" Height="30" Margin="0,0,12,0"/>
-                        <TextBlock Text="SKYRIM ONLINE" FontFamily="{StaticResource Display}" FontSize="22" FontWeight="Bold"
-                                   Foreground="{StaticResource GoldGradient}" VerticalAlignment="Center" Language="en"/>
-                        <Border BorderBrush="{StaticResource Gold}" BorderThickness="1" CornerRadius="2" Padding="7,1" Margin="10,0,0,0" VerticalAlignment="Center">
-                            <TextBlock Text="TR" FontFamily="{StaticResource Display}" FontSize="13" FontWeight="Bold" Foreground="{StaticResource GoldBright}"/>
-                        </Border>
-                    </StackPanel>
+        <!-- Chamfered iron edge around the slab -->
+        <Path Stroke="{StaticResource Iron}" StrokeThickness="2" IsHitTestVisible="False"
+              Data="M 16,1 L 1164,1 L 1179,16 L 1179,704 L 1164,719 L 16,719 L 1,704 L 1,16 Z"/>
 
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <Border x:Name="UserChip" Visibility="Collapsed" Background="#66000000" BorderBrush="#33C9A45C" BorderThickness="1"
-                                CornerRadius="16" Padding="4,4,12,4" Margin="0,0,12,0">
-                            <StackPanel Orientation="Horizontal">
-                                <Ellipse Width="24" Height="24" Margin="0,0,8,0">
-                                    <Ellipse.Fill>
-                                        <ImageBrush x:Name="AvatarBrush" Stretch="UniformToFill"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                                <TextBlock x:Name="UserName" Foreground="{StaticResource Parchment}" FontSize="13" VerticalAlignment="Center"/>
-                                <Button Content="Çıkış" Style="{StaticResource LinkButton}" Margin="12,0,0,0" VerticalAlignment="Center" Click="OnLogout"/>
-                            </StackPanel>
-                        </Border>
-                        <Button Style="{StaticResource ChromeButton}" Click="OnMinimize" ToolTip="Küçült">
-                            <Path Data="M0,0 L10,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
-                        </Button>
-                        <Button Style="{StaticResource ChromeButton}" Click="OnClose" ToolTip="Kapat">
-                            <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
-                        </Button>
-                    </StackPanel>
-                </Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="60"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="118"/>
+            </Grid.RowDefinitions>
 
-                <!-- Body -->
-                <Grid Grid.Row="1" Margin="0,40,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="320"/>
-                    </Grid.ColumnDefinitions>
+            <!-- Title bar -->
+            <Grid Grid.Row="0" Background="Transparent" MouseLeftButtonDown="OnDrag" Margin="28,0,14,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Skyrim Online" FontFamily="{StaticResource TypeLight}" FontWeight="Light" FontSize="28" Foreground="{StaticResource Snow}"/>
+                    <TextBlock Text="Türkiye" FontSize="15" Foreground="{StaticResource Ash}" Margin="10,0,0,4" VerticalAlignment="Bottom"/>
+                </StackPanel>
 
-                    <StackPanel Grid.Column="0" VerticalAlignment="Top">
-                        <TextBlock Text="Kuzeyin kapıları açık." FontFamily="{StaticResource Display}" FontSize="40"
-                                   Foreground="{StaticResource Parchment}" TextWrapping="Wrap">
-                            <TextBlock.Effect>
-                                <DropShadowEffect Color="Black" BlurRadius="16" ShadowDepth="0" Opacity="0.9"/>
-                            </TextBlock.Effect>
-                        </TextBlock>
-                        <TextBlock Text="Türkiye'nin Skyrim rol yapma sunucusu. Yolun seni nereye götürürse." FontSize="15"
-                                   Foreground="{StaticResource Muted}" Margin="2,10,0,0"/>
-
-                        <!-- Rune divider -->
-                        <Grid Width="260" HorizontalAlignment="Left" Margin="2,26,0,18">
-                            <Rectangle Height="1" Fill="{StaticResource GoldDim}" VerticalAlignment="Center"/>
-                            <Path Data="M0,6 L6,0 L12,6 L6,12 Z" Fill="#15130F" Stroke="{StaticResource Gold}" StrokeThickness="1" HorizontalAlignment="Center"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <StackPanel x:Name="UserChip" Orientation="Horizontal" Visibility="Collapsed" Margin="0,0,20,0" VerticalAlignment="Center">
+                        <Grid Width="28" Height="28" Margin="0,0,10,0">
+                            <Ellipse Stroke="{StaticResource Iron}" StrokeThickness="1.5">
+                                <Ellipse.Fill>
+                                    <ImageBrush x:Name="AvatarBrush" Stretch="UniformToFill"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
                         </Grid>
-
-                        <ItemsControl x:Name="NewsList" MaxWidth="520" HorizontalAlignment="Left">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <StackPanel Margin="2,0,0,16">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding Title}" FontFamily="{StaticResource Display}" FontSize="15" FontWeight="Bold" Foreground="{StaticResource GoldBright}"/>
-                                            <TextBlock Text="{Binding Date}" FontSize="12" Foreground="{StaticResource Muted}" Margin="10,2,0,0"/>
-                                        </StackPanel>
-                                        <TextBlock Text="{Binding Body}" FontSize="13" Foreground="{StaticResource Parchment}" Opacity="0.85" TextWrapping="Wrap" Margin="0,4,0,0"/>
-                                    </StackPanel>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <TextBlock x:Name="UserName" Foreground="{StaticResource Snow}" FontSize="17" VerticalAlignment="Center"/>
+                        <Button Content="Çıkış yap" Style="{StaticResource LinkButton}" Margin="14,0,0,0" VerticalAlignment="Center" Click="OnLogout"/>
                     </StackPanel>
+                    <Button Style="{StaticResource ChromeButton}" Click="OnMinimize" ToolTip="Küçült" AutomationProperties.Name="Küçült">
+                        <Path Data="M0,0 L10,0" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Button>
+                    <Button Style="{StaticResource ChromeButton}" Click="OnClose" ToolTip="Kapat" AutomationProperties.Name="Kapat">
+                        <Path Data="M0,0 L10,10 M10,0 L0,10" Stroke="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" StrokeThickness="1.2"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
 
-                    <!-- Realm card -->
-                    <Border Grid.Column="1" VerticalAlignment="Top" Background="{StaticResource Panel}" BorderBrush="#40C9A45C"
-                            BorderThickness="1" CornerRadius="6" Padding="20,16">
-                        <StackPanel>
-                            <TextBlock Text="DİYAR" FontFamily="{StaticResource Display}" FontSize="12" Foreground="{StaticResource Muted}"/>
-                            <TextBlock x:Name="ServerName" Text="Skyrim Online TR" FontFamily="{StaticResource Display}" FontSize="18"
-                                       Foreground="{StaticResource Parchment}" Margin="0,4,0,10"/>
-                            <StackPanel Orientation="Horizontal">
-                                <Ellipse x:Name="ServerDot" Width="9" Height="9" Fill="{StaticResource Muted}" Margin="0,0,8,0"/>
-                                <TextBlock x:Name="ServerStatus" Text="Kontrol ediliyor…" Foreground="{StaticResource Parchment}" FontSize="13"/>
+            <!-- Menu + pages -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="210"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="10,26,0,0">
+                    <RadioButton Style="{StaticResource NavItem}" Content="Ana sayfa" Tag="PageHome" IsChecked="True" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Haberler" Tag="PageNews" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Yama notları" Tag="PagePatch" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Modlar" Tag="PageMods" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Sunucu" Tag="PageServer" Checked="OnNav"/>
+                    <RadioButton Style="{StaticResource NavItem}" Content="Ayarlar" Tag="PageSettings" Checked="OnNav"/>
+                </StackPanel>
+
+                <!-- Thin iron seam between menu and page -->
+                <Rectangle Grid.Column="0" Width="1" HorizontalAlignment="Right" Fill="{StaticResource IronDark}" Margin="0,24,0,24"/>
+
+                <Grid x:Name="Pages" Grid.Column="1" Margin="44,22,40,20">
+
+                    <!-- Home -->
+                    <Grid x:Name="PageHome">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="300"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Margin="0,0,40,0">
+                            <TextBlock Text="Kuzeyin kapıları açık." FontFamily="{StaticResource TypeLight}" FontWeight="Light" FontSize="64"
+                                       Foreground="{StaticResource Snow}" TextWrapping="Wrap" LineHeight="64" LineStackingStrategy="BlockLineHeight"/>
+                            <TextBlock Text="Türkiye'nin Skyrim rol yapma sunucusu. Yolun seni nereye götürürse." Style="{StaticResource PageLead}" Margin="2,12,0,34"/>
+
+                            <TextBlock Text="Son haberler" Style="{StaticResource GroupTitle}"/>
+                            <ItemsControl x:Name="HomeNewsList" MaxWidth="560" HorizontalAlignment="Left">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Margin="0,4,0,14">
+                                            <TextBlock FontSize="18" Foreground="{StaticResource Snow}">
+                                                <Run Text="{Binding Title, Mode=OneWay}"/>
+                                                <Run Text="{Binding Date, Mode=OneWay}" FontSize="14" Foreground="{StaticResource Ash}"/>
+                                            </TextBlock>
+                                            <TextBlock Text="{Binding Body}" Style="{StaticResource Body}" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="HomeNewsEmpty" Text="Henüz haber yok." Style="{StaticResource Body}" Visibility="Collapsed"/>
+                        </StackPanel>
+
+                        <!-- Realm stone -->
+                        <Border Grid.Column="1" VerticalAlignment="Top" Background="{StaticResource RockDeep}" BorderBrush="{StaticResource Iron}" BorderThickness="1" Padding="22,18">
+                            <StackPanel>
+                                <TextBlock x:Name="ServerName" Text="Skyrim Online TR" FontSize="22" FontWeight="Medium" Foreground="{StaticResource Snow}"/>
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <Path x:Name="ServerDot" Data="{StaticResource Diamond}" Fill="{StaticResource Ash}" Width="9" Height="9" Stretch="Uniform" Margin="0,1,9,0" VerticalAlignment="Center"/>
+                                    <TextBlock x:Name="ServerStatus" Text="Kontrol ediliyor" Foreground="{StaticResource Snow}" FontSize="17"/>
+                                    <TextBlock x:Name="ServerPing" Foreground="{StaticResource Ash}" FontSize="15" Margin="10,1,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                                <Rectangle Height="1" Fill="{StaticResource IronDark}" Margin="0,16"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Text="Oyun sürümü" Foreground="{StaticResource Ash}" FontSize="16"/>
+                                    <TextBlock x:Name="ModlistVersionText" Grid.Column="1" Text="—" Foreground="{StaticResource Snow}" FontSize="16"/>
+                                    <TextBlock Grid.Row="1" Text="Launcher" Foreground="{StaticResource Ash}" FontSize="16" Margin="0,6,0,0"/>
+                                    <TextBlock x:Name="LauncherVersionText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource Snow}" FontSize="16" Margin="0,6,0,0"/>
+                                </Grid>
                             </StackPanel>
-                            <Rectangle Height="1" Fill="#33C9A45C" Margin="0,14"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- News -->
+                    <Grid x:Name="PageNews" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Haberler" Style="{StaticResource PageTitle}" Margin="0,0,0,20"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
+                            <StackPanel>
+                                <ItemsControl x:Name="NewsList" MaxWidth="640" HorizontalAlignment="Left">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,24">
+                                                <TextBlock Text="{Binding Date}" FontSize="15" Foreground="{StaticResource Ash}"/>
+                                                <TextBlock Text="{Binding Title}" FontSize="24" Foreground="{StaticResource Snow}" TextWrapping="Wrap" Margin="0,2,0,6"/>
+                                                <TextBlock Text="{Binding Body}" Style="{StaticResource Body}"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock x:Name="NewsEmpty" Text="Henüz haber yok. Duyurular burada ve Discord'da yayınlanır." Style="{StaticResource Body}" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Patch notes -->
+                    <Grid x:Name="PagePatch" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Yama notları" Style="{StaticResource PageTitle}"/>
+                        <TextBlock Grid.Row="1" Text="Her güncellemede oyunda neyin değiştiği." Style="{StaticResource PageLead}"/>
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Focusable="False">
+                            <StackPanel>
+                                <ItemsControl x:Name="PatchList" MaxWidth="660" HorizontalAlignment="Left">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Grid Margin="0,0,0,26">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="150"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Version}" FontSize="20" FontWeight="Medium" Foreground="{StaticResource Snow}"/>
+                                                    <TextBlock Text="{Binding Date}" FontSize="15" Foreground="{StaticResource Ash}"/>
+                                                </StackPanel>
+                                                <ItemsControl Grid.Column="1" ItemsSource="{Binding Changes}" Margin="0,3,0,0">
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Grid Margin="0,0,0,6">
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="18"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <Path Data="{StaticResource Diamond}" Fill="{StaticResource Iron}" Width="7" Height="7" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource Body}" Foreground="{StaticResource Snow}"/>
+                                                            </Grid>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock x:Name="PatchEmpty" Text="Henüz yama notu yayınlanmadı." Style="{StaticResource Body}" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Mods -->
+                    <Grid x:Name="PageMods" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Modlar" Style="{StaticResource PageTitle}"/>
+                        <TextBlock x:Name="ModsLead" Grid.Row="1" Text="Sunucudaki herkes aynı modlarla oynar; launcher bunları kendisi kurar ve günceller." Style="{StaticResource PageLead}"/>
+                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Focusable="False">
+                            <StackPanel>
+                                <ItemsControl x:Name="ModList" MaxWidth="700" HorizontalAlignment="Left">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border BorderBrush="{StaticResource IronDark}" BorderThickness="0,0,0,1" Padding="0,10">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel>
+                                                        <TextBlock FontSize="18" Foreground="{StaticResource Snow}">
+                                                            <Run Text="{Binding Name, Mode=OneWay}"/>
+                                                            <Run Text="{Binding Author, Mode=OneWay}" FontSize="15" Foreground="{StaticResource Ash}"/>
+                                                        </TextBlock>
+                                                        <TextBlock Text="{Binding About}" Style="{StaticResource Body}" FontSize="15" Margin="0,2,0,0"/>
+                                                    </StackPanel>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Version}" FontSize="16" Foreground="{StaticResource Ash}" Margin="24,2,0,0"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                                <TextBlock x:Name="ModsEmpty" Text="Mod listesi yüklenemedi. Güncelleme sunucusuna bağlanınca burada görünür." Style="{StaticResource Body}" Visibility="Collapsed"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Server & community -->
+                    <Grid x:Name="PageServer" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock x:Name="ServerTitle" Text="Sunucu" Style="{StaticResource PageTitle}" Margin="0,0,0,20"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
                             <Grid>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition/>
-                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="280"/>
+                                    <ColumnDefinition Width="*"/>
                                 </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                    <RowDefinition/>
-                                </Grid.RowDefinitions>
-                                <TextBlock Text="Oyun sürümü" Foreground="{StaticResource Muted}" FontSize="12"/>
-                                <TextBlock x:Name="ModlistVersionText" Grid.Column="1" Text="—" Foreground="{StaticResource Parchment}" FontSize="12"/>
-                                <TextBlock Grid.Row="1" Text="Launcher" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"/>
-                                <TextBlock x:Name="LauncherVersionText" Grid.Row="1" Grid.Column="1" Foreground="{StaticResource Parchment}" FontSize="12" Margin="0,6,0,0"/>
-                                <TextBlock Grid.Row="2" Text="Kurulum" Foreground="{StaticResource Muted}" FontSize="12" Margin="0,6,0,0"/>
-                                <Button x:Name="InstallDirButton" Grid.Row="2" Grid.Column="1" Style="{StaticResource LinkButton}" Margin="0,6,0,0"
-                                        Click="OnChangeInstallDir" ToolTip="Kurulum klasörünü değiştir">
-                                    <TextBlock x:Name="InstallDirText" TextTrimming="CharacterEllipsis" MaxWidth="170" TextDecorations="Underline"/>
-                                </Button>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                                <StackPanel Margin="0,0,40,0">
+                                    <TextBlock Text="Durum" Style="{StaticResource GroupTitle}"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Path x:Name="ServerDot2" Data="{StaticResource Diamond}" Fill="{StaticResource Ash}" Width="9" Height="9" Stretch="Uniform" Margin="0,1,9,0" VerticalAlignment="Center"/>
+                                        <TextBlock x:Name="ServerStatus2" Text="Kontrol ediliyor" FontSize="17" Foreground="{StaticResource Snow}"/>
+                                    </StackPanel>
+                                    <TextBlock x:Name="ServerPing2" Style="{StaticResource Body}" Margin="0,4,0,0"/>
+                                    <TextBlock x:Name="ServerAddress" Style="{StaticResource Body}" Margin="0,2,0,22"/>
+                                    <Button Style="{StaticResource IronButton}" Content="Durumu yenile" HorizontalAlignment="Left" Click="OnRefreshServer"/>
 
-                <!-- Footer: progress + action -->
-                <Grid Grid.Row="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0" VerticalAlignment="Bottom" Margin="0,0,40,10">
-                        <Grid>
-                            <TextBlock x:Name="PhaseText" FontFamily="{StaticResource Display}" FontSize="15" Foreground="{StaticResource GoldBright}"/>
-                            <TextBlock x:Name="PercentText" HorizontalAlignment="Right" FontSize="13" Foreground="{StaticResource Parchment}"/>
-                        </Grid>
-                        <ProgressBar x:Name="Progress" Style="{StaticResource GoldProgress}" Margin="0,8,0,8" Maximum="1" Visibility="Hidden"/>
-                        <TextBlock x:Name="DetailText" FontSize="12" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
-                    <Button x:Name="ActionButton" Grid.Column="1" Style="{StaticResource PlayButton}" Width="300" Height="64"
-                            Content="YÜKLENİYOR" IsEnabled="False" Click="OnAction"/>
+                                    <StackPanel x:Name="DiscordBlock" Margin="0,34,0,0" Visibility="Collapsed">
+                                        <TextBlock Text="Topluluk" Style="{StaticResource GroupTitle}"/>
+                                        <TextBlock Text="Duyurular, destek ve takım kurmak için Discord sunucumuza katıl." Style="{StaticResource Body}" Margin="0,0,0,12"/>
+                                        <Button Style="{StaticResource IronButton}" Content="Discord'u aç" HorizontalAlignment="Left" Click="OnOpenDiscord"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Kurallar" Style="{StaticResource GroupTitle}"/>
+                                    <ItemsControl x:Name="RulesList" MaxWidth="480" HorizontalAlignment="Left">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <Grid Margin="0,0,0,8">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="18"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Path Data="{StaticResource Diamond}" Fill="{StaticResource Iron}" Width="7" Height="7" Stretch="Uniform" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="0,8,0,0"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding}" Style="{StaticResource Body}" Foreground="{StaticResource Snow}"/>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock x:Name="RulesEmpty" Text="Kurallar henüz yayınlanmadı." Style="{StaticResource Body}" Visibility="Collapsed"/>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
+
+                    <!-- Settings -->
+                    <Grid x:Name="PageSettings" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="Ayarlar" Style="{StaticResource PageTitle}" Margin="0,0,0,20"/>
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Focusable="False">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel Margin="0,0,36,0">
+                                    <TextBlock Text="Görüntü" Style="{StaticResource GroupTitle}"/>
+                                    <StackPanel x:Name="DisplayPanel">
+                                        <TextBlock Text="Pencere" Style="{StaticResource Body}" Margin="0,0,0,6"/>
+                                        <WrapPanel>
+                                            <RadioButton x:Name="ModeFullscreen" Style="{StaticResource Choice}" GroupName="Mode" Content="Tam ekran"/>
+                                            <RadioButton x:Name="ModeBorderless" Style="{StaticResource Choice}" GroupName="Mode" Content="Kenarlıksız"/>
+                                            <RadioButton x:Name="ModeWindowed" Style="{StaticResource Choice}" GroupName="Mode" Content="Pencere"/>
+                                        </WrapPanel>
+                                        <TextBlock Text="Çözünürlük" Style="{StaticResource Body}" Margin="0,12,0,6"/>
+                                        <WrapPanel x:Name="ResolutionChoices"/>
+                                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                                            <Button Style="{StaticResource IronButton}" Content="Görüntüyü kaydet" Click="OnSaveDisplay"/>
+                                            <TextBlock x:Name="DisplayNote" Style="{StaticResource Body}" Margin="14,0,0,0" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <TextBlock x:Name="DisplayUnavailable" Text="Oyun kurulunca görüntü ayarları burada değiştirilebilir." Style="{StaticResource Body}" Visibility="Collapsed"/>
+
+                                    <TextBlock Text="Kurulum" Style="{StaticResource GroupTitle}" Margin="0,30,0,8"/>
+                                    <TextBlock x:Name="InstallDirText" Style="{StaticResource Body}" Foreground="{StaticResource Snow}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                    <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                        <Button x:Name="InstallDirButton" Style="{StaticResource LinkButton}" Content="Klasörü değiştir" Click="OnChangeInstallDir"/>
+                                        <Button Style="{StaticResource LinkButton}" Content="Klasörü aç" Margin="20,0,0,0" Click="OnOpenInstallDir"/>
+                                    </StackPanel>
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="Bakım" Style="{StaticResource GroupTitle}"/>
+
+                                    <TextBlock Text="Oyun açılmıyor ya da çöküyorsa tüm dosyalar kontrol edilir, bozuk ya da eksik olanlar yeniden indirilir." Style="{StaticResource Body}" Margin="0,0,0,10"/>
+                                    <Button x:Name="RepairButton" Style="{StaticResource IronButton}" Content="Dosyaları onar" HorizontalAlignment="Left" Click="OnRepair"/>
+
+                                    <TextBlock x:Name="CacheText" Style="{StaticResource Body}" Margin="0,24,0,10"/>
+                                    <Button x:Name="ClearCacheButton" Style="{StaticResource IronButton}" Content="İndirmeleri sil" HorizontalAlignment="Left" Click="OnClearCache"/>
+
+                                    <TextBlock Text="Bir hata bildirirken bu kayıtları Discord'da paylaş." Style="{StaticResource Body}" Margin="0,24,0,8"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource LinkButton}" Content="Çökme kayıtları" Click="OnOpenCrashLogs"/>
+                                        <Button Style="{StaticResource LinkButton}" Content="Launcher kaydı" Margin="20,0,0,0" Click="OnOpenLauncherLogs"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </ScrollViewer>
+                    </Grid>
                 </Grid>
             </Grid>
+
+            <!-- Iron band: progress on the left, the keystone on the right -->
+            <Grid Grid.Row="2">
+                <Border Background="{StaticResource IronFace}" BorderBrush="{StaticResource Iron}" BorderThickness="0,1,0,0" Margin="0,14,0,0"/>
+                <Rectangle Height="1" VerticalAlignment="Top" Margin="0,15,0,0" Fill="#555E64" Opacity="0.6"/>
+                <!-- rivets along the band -->
+                <ItemsControl x:Name="Rivets" Margin="18,21,340,0" VerticalAlignment="Top" IsHitTestVisible="False" Focusable="False">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <UniformGrid Rows="1"/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Rectangle Width="8" Height="8" Fill="{StaticResource RivetBrush}" HorizontalAlignment="Left"/>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+
+                <Grid Margin="40,40,350,14">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid>
+                        <TextBlock x:Name="PhaseText" FontSize="19" Foreground="{StaticResource Snow}"/>
+                        <TextBlock x:Name="PercentText" HorizontalAlignment="Right" FontSize="17" Foreground="{StaticResource Frost}"/>
+                    </Grid>
+                    <ProgressBar x:Name="Progress" Grid.Row="1" Style="{StaticResource FrostProgress}" Margin="0,5,0,5" Maximum="1" Visibility="Hidden"/>
+                    <TextBlock x:Name="DetailText" Grid.Row="2" FontSize="15" Foreground="{StaticResource Ash}" TextTrimming="CharacterEllipsis"/>
+                </Grid>
+
+                <Button x:Name="ActionButton" Style="{StaticResource PlayButton}" Width="280" Height="76"
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,34,0"
+                        Content="Bekle" IsEnabled="False" Click="OnAction"/>
+            </Grid>
         </Grid>
-    </Border>
+    </Grid>
 </Window>

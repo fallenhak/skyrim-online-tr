@@ -3,41 +3,58 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <FontFamily x:Key="Display">pack://application:,,,/Assets/Fonts/#Cinzel</FontFamily>
-        <FontFamily x:Key="Body">Segoe UI</FontFamily>
+        <!-- Barlow Condensed: closest open font to Skyrim's Futura Condensed menus -->
+        <FontFamily x:Key="Type">pack://application:,,,/Assets/Fonts/#Barlow Condensed</FontFamily>
+        <FontFamily x:Key="TypeLight">pack://application:,,,/Assets/Fonts/#Barlow Condensed Light</FontFamily>
 
-        <Color x:Key="GoldColor">#C9A45C</Color>
-        <SolidColorBrush x:Key="Gold" Color="#C9A45C"/>
-        <SolidColorBrush x:Key="GoldBright" Color="#EAD29A"/>
-        <SolidColorBrush x:Key="GoldDim" Color="#6E5A33"/>
-        <SolidColorBrush x:Key="Parchment" Color="#E8DCC0"/>
-        <SolidColorBrush x:Key="Muted" Color="#8F8573"/>
-        <SolidColorBrush x:Key="Panel" Color="#B0100E0C"/>
-        <SolidColorBrush x:Key="Danger" Color="#C8583E"/>
-        <SolidColorBrush x:Key="Ok" Color="#7FB069"/>
+        <!-- Nord stone and iron -->
+        <Color x:Key="SootColor">#1D2023</Color>
+        <Color x:Key="FrostColor">#9CCFE0</Color>
+        <SolidColorBrush x:Key="Soot" Color="#1D2023"/>
+        <SolidColorBrush x:Key="Rock" Color="#2A2F33"/>
+        <SolidColorBrush x:Key="RockDeep" Color="#CC181B1E"/>
+        <SolidColorBrush x:Key="Iron" Color="#4E555B"/>
+        <SolidColorBrush x:Key="IronDark" Color="#33383C"/>
+        <SolidColorBrush x:Key="Ash" Color="#A9B0B3"/>
+        <SolidColorBrush x:Key="Snow" Color="#E4E8E8"/>
+        <SolidColorBrush x:Key="Frost" Color="#9CCFE0"/>
+        <SolidColorBrush x:Key="FrostFaint" Color="#339CCFE0"/>
+        <SolidColorBrush x:Key="Rust" Color="#C87550"/>
+        <SolidColorBrush x:Key="Lichen" Color="#86A36F"/>
 
-        <LinearGradientBrush x:Key="GoldGradient" StartPoint="0,0" EndPoint="0,1">
-            <GradientStop Color="#F3DFA8" Offset="0"/>
-            <GradientStop Color="#C9A45C" Offset="0.5"/>
-            <GradientStop Color="#8C6A2E" Offset="1"/>
+        <ImageBrush x:Key="StoneTexture" ImageSource="pack://application:,,,/Assets/stone.png"
+                    TileMode="Tile" Viewport="0,0,256,256" ViewportUnits="Absolute"/>
+
+        <!-- Forged iron: dark face, lighter top edge -->
+        <LinearGradientBrush x:Key="IronFace" StartPoint="0,0" EndPoint="0,1">
+            <GradientStop Color="#3B4146" Offset="0"/>
+            <GradientStop Color="#2B3034" Offset="0.5"/>
+            <GradientStop Color="#202428" Offset="1"/>
         </LinearGradientBrush>
+
+        <Style TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+        </Style>
 
         <!-- Window control glyph buttons -->
         <Style x:Key="ChromeButton" TargetType="Button">
             <Setter Property="Width" Value="40"/>
             <Setter Property="Height" Value="32"/>
-            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border x:Name="bg" Background="Transparent" CornerRadius="4">
+                        <Border x:Name="bg" Background="Transparent" BorderBrush="Transparent" BorderThickness="1">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="bg" Property="Background" Value="#22C9A45C"/>
-                                <Setter Property="Foreground" Value="{StaticResource GoldBright}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bg" Property="BorderBrush" Value="{StaticResource Frost}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -47,17 +64,23 @@
 
         <!-- Quiet text link -->
         <Style x:Key="LinkButton" TargetType="Button">
-            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
-            <Setter Property="FontFamily" Value="{StaticResource Body}"/>
-            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="15"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <ContentPresenter/>
+                        <Border x:Name="bd" BorderThickness="0,0,0,1" BorderBrush="Transparent">
+                            <ContentPresenter/>
+                        </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{StaticResource GoldBright}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Frost}"/>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
                                 <Setter Property="Opacity" Value="0.4"/>
@@ -68,34 +91,142 @@
             </Setter>
         </Style>
 
-        <!-- The main action button: engraved gold plate with notched corners -->
-        <Style x:Key="PlayButton" TargetType="Button">
-            <Setter Property="FontFamily" Value="{StaticResource Display}"/>
-            <Setter Property="FontSize" Value="24"/>
-            <Setter Property="FontWeight" Value="Bold"/>
-            <Setter Property="Foreground" Value="#1A140A"/>
+        <!-- Left menu entry, styled after Skyrim's pause menu: text only, a frost line marks the current page -->
+        <Style x:Key="NavItem" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="21"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="GroupName" Value="Nav"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Grid Background="Transparent" Height="42">
+                            <Rectangle x:Name="mark" Width="2" HorizontalAlignment="Left" Fill="{StaticResource Frost}" Margin="0,9" Visibility="Hidden"/>
+                            <ContentPresenter Margin="20,0,0,0" VerticalAlignment="Center"/>
+                            <Rectangle x:Name="focus" Height="1" VerticalAlignment="Bottom" Margin="20,0,0,6" Fill="{StaticResource Frost}" Visibility="Hidden"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                                <Setter TargetName="mark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="focus" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Choice in a small set (window mode, resolution) -->
+        <Style x:Key="Choice" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Margin" Value="0,0,6,6"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="bd" Background="#14000000" BorderBrush="{StaticResource IronDark}" BorderThickness="1" Padding="14,5">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Iron}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Frost}"/>
+                                <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Secondary action: small iron plate -->
+        <Style x:Key="IronButton" TargetType="Button">
+            <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="bd" Background="{StaticResource IronFace}" BorderBrush="{StaticResource Iron}" BorderThickness="1" Padding="16,7">
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Ash}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="bd" Property="BorderBrush" Value="{StaticResource Frost}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="bd" Property="Background" Value="#202428"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.4"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- The main action: a carved keystone set into the iron band, lit from inside by frost -->
+        <Style x:Key="PlayButton" TargetType="Button">
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Grid x:Name="root">
-                            <Path x:Name="plate" Stretch="Fill" Fill="{StaticResource GoldGradient}"
-                                  Data="M 14,0 L 286,0 L 300,14 L 300,50 L 286,64 L 14,64 L 0,50 L 0,14 Z">
-                                <Path.Effect>
-                                    <DropShadowEffect x:Name="glow" Color="#C9A45C" BlurRadius="18" ShadowDepth="0" Opacity="0.35"/>
-                                </Path.Effect>
+                            <!-- stone block with chamfered corners -->
+                            <Path x:Name="stone" Stretch="Fill" Stroke="{StaticResource Iron}" StrokeThickness="1.5"
+                                  Data="M 18,0 L 262,0 L 280,18 L 280,58 L 262,76 L 18,76 L 0,58 L 0,18 Z">
+                                <Path.Fill>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                        <GradientStop Color="#3A4146" Offset="0"/>
+                                        <GradientStop Color="#262B2F" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Path.Fill>
                             </Path>
-                            <Path Stretch="Fill" Margin="5" Stroke="#5A4418" StrokeThickness="1" Opacity="0.7"
-                                  Data="M 12,0 L 278,0 L 290,12 L 290,42 L 278,54 L 12,54 L 0,42 L 0,12 Z"/>
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,2,0,0"/>
+                            <!-- inner carved groove -->
+                            <Path x:Name="groove" Stretch="Fill" Margin="7" Stroke="{StaticResource Frost}" StrokeThickness="1" Opacity="0.55"
+                                  Data="M 14,0 L 252,0 L 266,14 L 266,48 L 252,62 L 14,62 L 0,48 L 0,14 Z"/>
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,2">
+                                <ContentPresenter.Effect>
+                                    <DropShadowEffect x:Name="lit" Color="{StaticResource FrostColor}" BlurRadius="14" ShadowDepth="0" Opacity="0.55"/>
+                                </ContentPresenter.Effect>
+                            </ContentPresenter>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="plate" Property="Effect">
-                                    <Setter.Value>
-                                        <DropShadowEffect Color="#EAD29A" BlurRadius="30" ShadowDepth="0" Opacity="0.7"/>
-                                    </Setter.Value>
-                                </Setter>
+                                <Setter TargetName="groove" Property="Opacity" Value="1"/>
+                                <Setter TargetName="stone" Property="Stroke" Value="{StaticResource Ash}"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="groove" Property="Opacity" Value="1"/>
+                                <Setter TargetName="groove" Property="StrokeThickness" Value="2"/>
                             </Trigger>
                             <Trigger Property="IsPressed" Value="True">
                                 <Setter TargetName="root" Property="RenderTransform">
@@ -105,9 +236,9 @@
                                 </Setter>
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="False">
-                                <Setter TargetName="plate" Property="Fill" Value="#3A3326"/>
-                                <Setter Property="Foreground" Value="#8F8573"/>
-                                <Setter TargetName="plate" Property="Effect" Value="{x:Null}"/>
+                                <Setter TargetName="groove" Property="Stroke" Value="{StaticResource Iron}"/>
+                                <Setter TargetName="groove" Property="Opacity" Value="0.6"/>
+                                <Setter Property="Foreground" Value="{StaticResource Ash}"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -115,23 +246,29 @@
             </Setter>
         </Style>
 
-        <!-- Thin gold progress rail -->
-        <Style x:Key="GoldProgress" TargetType="ProgressBar">
-            <Setter Property="Height" Value="4"/>
+        <!-- Progress: a groove in the iron band that fills with frost -->
+        <Style x:Key="FrostProgress" TargetType="ProgressBar">
+            <Setter Property="Height" Value="5"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ProgressBar">
-                        <Grid>
-                            <Border Background="#33C9A45C" CornerRadius="2"/>
+                        <Grid ClipToBounds="True">
+                            <Border Background="#161A1D" BorderBrush="#0E1012" BorderThickness="0,1,0,0"/>
                             <Border x:Name="PART_Track"/>
-                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" CornerRadius="2"
-                                    Background="{StaticResource GoldGradient}">
+                            <Border x:Name="PART_Indicator" HorizontalAlignment="Left" Background="{StaticResource Frost}">
                                 <Border.Effect>
-                                    <DropShadowEffect Color="#EAD29A" BlurRadius="8" ShadowDepth="0" Opacity="0.8"/>
+                                    <DropShadowEffect Color="{StaticResource FrostColor}" BlurRadius="8" ShadowDepth="0" Opacity="0.7"/>
                                 </Border.Effect>
                             </Border>
-                            <Border x:Name="PART_GlowRect" Width="120" HorizontalAlignment="Left" CornerRadius="2"
-                                    Background="{StaticResource GoldGradient}" Visibility="Collapsed"/>
+                            <Border x:Name="PART_GlowRect" Width="140" HorizontalAlignment="Left" Visibility="Collapsed">
+                                <Border.Background>
+                                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                                        <GradientStop Color="#009CCFE0" Offset="0"/>
+                                        <GradientStop Color="#9CCFE0" Offset="0.5"/>
+                                        <GradientStop Color="#009CCFE0" Offset="1"/>
+                                    </LinearGradientBrush>
+                                </Border.Background>
+                            </Border>
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsIndeterminate" Value="True">
@@ -142,6 +279,59 @@
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
+        </Style>
+
+        <!-- Scrollbar: a thin iron rod -->
+        <Style TargetType="ScrollBar">
+            <Setter Property="Width" Value="6"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ScrollBar">
+                        <Track x:Name="PART_Track" IsDirectionReversed="True">
+                            <Track.Thumb>
+                                <Thumb>
+                                    <Thumb.Template>
+                                        <ControlTemplate TargetType="Thumb">
+                                            <Border Background="{StaticResource Iron}" Width="3"/>
+                                        </ControlTemplate>
+                                    </Thumb.Template>
+                                </Thumb>
+                            </Track.Thumb>
+                        </Track>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Section heading inside a page -->
+        <Style x:Key="PageTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource TypeLight}"/>
+            <Setter Property="FontSize" Value="40"/>
+            <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+            <Setter Property="Margin" Value="0,0,0,4"/>
+        </Style>
+        <Style x:Key="PageLead" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="MaxWidth" Value="560"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Margin" Value="0,0,0,24"/>
+        </Style>
+        <Style x:Key="GroupTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="21"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="Foreground" Value="{StaticResource Snow}"/>
+            <Setter Property="Margin" Value="0,0,0,8"/>
+        </Style>
+        <Style x:Key="Body" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource Type}"/>
+            <Setter Property="FontSize" Value="17"/>
+            <Setter Property="LineHeight" Value="23"/>
+            <Setter Property="Foreground" Value="{StaticResource Ash}"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </Application.Resources>
 </Application>

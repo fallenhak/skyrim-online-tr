@@ -1,5 +1,8 @@
+using System.Diagnostics;
 using System.Net.Http;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media.Animation;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -34,6 +37,10 @@ public partial class MainWindow : Window
         LauncherVersionText.Text = LauncherConfig.CurrentVersion.ToString(3);
         InstallDirText.Text = _state.InstallRoot;
         ModlistVersionText.Text = _state.ModlistVersion ?? "kurulu değil";
+        Rivets.ItemsSource = Enumerable.Range(0, 16);
+        BuildResolutionChoices();
+        LoadDisplaySettings();
+        _ = UpdateCacheSizeAsync();
 
         _pollTimer.Tick += async (_, _) => await CheckForUpdatesAsync(silent: true);
         _gameWatch.Tick += (_, _) => { if (_mode == Mode.Running && !GameRunner.IsGameRunning(_state)) { _gameWatch.Stop(); Refresh(); } };
@@ -64,8 +71,7 @@ public partial class MainWindow : Window
             return;
         }
 
-        NewsList.ItemsSource = _feed.News;
-        ServerName.Text = _feed.Server.Name;
+        ShowFeed(_feed);
         _ = UpdateServerStatusAsync(_feed.Server);
 
         // Self-update happens right away unless the player is mid-install or in game.
@@ -81,21 +87,50 @@ public partial class MainWindow : Window
         if (silent && !_working) Refresh();
     }
 
+    private void ShowFeed(Feed feed)
+    {
+        var news = feed.News ?? [];
+        HomeNewsList.ItemsSource = news.Take(2).ToList();
+        NewsList.ItemsSource = news;
+        HomeNewsEmpty.Visibility = NewsEmpty.Visibility = news.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var patches = feed.PatchNotes ?? [];
+        PatchList.ItemsSource = patches;
+        PatchEmpty.Visibility = patches.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var mods = feed.Mods ?? [];
+        ModList.ItemsSource = mods;
+        ModsEmpty.Visibility = mods.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        var rules = feed.Rules ?? [];
+        RulesList.ItemsSource = rules;
+        RulesEmpty.Visibility = rules.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+
+        ServerName.Text = ServerTitle.Text = feed.Server.Name;
+        ServerAddress.Text = $"Adres: {feed.Server.Host}:{feed.Server.Port}";
+        DiscordBlock.Visibility = string.IsNullOrWhiteSpace(feed.Server.DiscordUrl) ? Visibility.Collapsed : Visibility.Visible;
+    }
+
     private async Task UpdateServerStatusAsync(FeedServer server)
     {
-        var online = false;
+        ServerStatus.Text = ServerStatus2.Text = "Kontrol ediliyor";
+        long? ms = null;
         if (server.StatusUrl is { Length: > 0 } url)
         {
             try
             {
                 using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-                using var response = await _http.GetAsync(url, cts.Token);
-                online = response.IsSuccessStatusCode;
+                var watch = Stopwatch.StartNew();
+                using var response = await _http.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                if (response.IsSuccessStatusCode) ms = watch.ElapsedMilliseconds;
             }
             catch (Exception e) when (e is HttpRequestException or TaskCanceledException) { }
         }
-        ServerDot.Fill = (Brush)FindResource(online ? "Ok" : "Danger");
-        ServerStatus.Text = online ? "Çevrimiçi" : "Ulaşılamıyor";
+        var online = ms is not null;
+        ServerDot.Fill = ServerDot2.Fill = (Brush)FindResource(online ? "Lichen" : "Rust");
+        ServerStatus.Text = ServerStatus2.Text = online ? "Çevrimiçi" : "Ulaşılamıyor";
+        ServerPing.Text = online ? $"{ms} ms" : "";
+        ServerPing2.Text = online ? $"Gecikme: {ms} ms" : "Sunucu yanıt vermedi. Birazdan tekrar dene; sorun sürerse Discord'dan haber ver.";
     }
 
     /// <summary>A stored token is refreshed on every start, so an active player never sees the login screen.</summary>
@@ -154,16 +189,19 @@ public partial class MainWindow : Window
         _mode = mode;
         (ActionButton.Content, ActionButton.IsEnabled, var phase, var detail) = mode switch
         {
-            Mode.Login => ("DISCORD İLE GİR", true, "Hoş geldin, gezgin", "Oynamak için Discord hesabınla giriş yap."),
-            Mode.Install => ("KUR", true, "Kurulum gerekli", $"Oyun {_state.InstallRoot} klasörüne kurulacak. Steam'deki Skyrim'ine dokunulmaz."),
-            Mode.Update => ("GÜNCELLE", true, "Güncelleme hazır", $"Yeni sürüm: {_feed?.Modlist.Version}"),
-            Mode.Play => ("OYNA", true, "Hazır", _feed is null ? "Güncelleme sunucusuna ulaşılamadı; mevcut kurulumla oynanabilir." : "Kılıcını kuşan."),
-            Mode.Running => ("OYUN AÇIK", false, "Oyun çalışıyor", "Oyunu kapatınca launcher tekrar hazır olur."),
-            Mode.Offline => ("TEKRAR DENE", true, "Bağlantı yok", "İnternet bağlantını kontrol et."),
-            _ => ("BEKLE", false, PhaseText.Text, DetailText.Text),
+            Mode.Login => ("Discord ile gir", true, "Hoş geldin, gezgin", "Oynamak için Discord hesabınla giriş yap."),
+            Mode.Install => ("Kur", true, "Kurulum gerekli", $"Oyun {_state.InstallRoot} klasörüne kurulacak. Steam'deki Skyrim'ine dokunulmaz."),
+            Mode.Update => ("Güncelle", true, "Güncelleme hazır", $"Yeni sürüm: {_feed?.Modlist.Version}"),
+            Mode.Play => ("Oyna", true, "Hazır", _feed is null ? "Güncelleme sunucusuna ulaşılamadı; mevcut kurulumla oynanabilir." : "Kılıcını kuşan."),
+            Mode.Running => ("Oyun açık", false, "Oyun çalışıyor", "Oyunu kapatınca launcher tekrar hazır olur."),
+            Mode.Offline => ("Tekrar dene", true, "Bağlantı yok", "İnternet bağlantını kontrol et."),
+            _ => ("Bekle", false, PhaseText.Text, DetailText.Text),
         };
         SetPhase(phase, null, detail);
         InstallDirButton.IsEnabled = mode is Mode.Login or Mode.Install;
+        RepairButton.IsEnabled = _feed is not null && _state.IsInstalled && mode is Mode.Play or Mode.Update;
+        ClearCacheButton.IsEnabled = mode is not Mode.Running;
+        LoadDisplaySettings();
     }
 
     private async void OnAction(object sender, RoutedEventArgs e)
@@ -226,7 +264,8 @@ public partial class MainWindow : Window
         if (_working) return;
         _working = true;
         ActionButton.IsEnabled = false;
-        ActionButton.Content = "BEKLE";
+        ActionButton.Content = "Bekle";
+        RepairButton.IsEnabled = ClearCacheButton.IsEnabled = false;
         Progress.Visibility = Visibility.Visible;
         Progress.IsIndeterminate = true;
         try
@@ -274,6 +313,126 @@ public partial class MainWindow : Window
 
     private IProgress<InstallProgress> InstallProgressReporter() =>
         new Progress<InstallProgress>(p => SetPhase(p.Phase, p.Fraction, p.Detail));
+
+    // ---------- Pages ----------
+
+    private void OnNav(object sender, RoutedEventArgs e)
+    {
+        if (Pages is null || sender is not RadioButton { Tag: string name }) return;
+        foreach (var page in Pages.Children.OfType<FrameworkElement>())
+            page.Visibility = page.Name == name ? Visibility.Visible : Visibility.Collapsed;
+        if (Pages.FindName(name) is FrameworkElement shown && SystemParameters.ClientAreaAnimation)
+            shown.BeginAnimation(OpacityProperty, new DoubleAnimation(0, 1, TimeSpan.FromMilliseconds(160)));
+        if (name == "PageSettings") _ = UpdateCacheSizeAsync();
+    }
+
+    private async void OnRefreshServer(object sender, RoutedEventArgs e)
+    {
+        if (_feed is not null) await UpdateServerStatusAsync(_feed.Server);
+        else await CheckForUpdatesAsync(silent: false);
+    }
+
+    private void OnOpenDiscord(object sender, RoutedEventArgs e)
+    {
+        if (_feed?.Server.DiscordUrl is { Length: > 0 } url) Open(url);
+    }
+
+    // ---------- Settings ----------
+
+    private static readonly (int w, int h)[] Resolutions =
+        [(1280, 720), (1600, 900), (1920, 1080), (2560, 1080), (2560, 1440), (3440, 1440), (3840, 2160)];
+
+    private void BuildResolutionChoices()
+    {
+        foreach (var (w, h) in Resolutions)
+            ResolutionChoices.Children.Add(new RadioButton
+            {
+                Style = (Style)FindResource("Choice"), GroupName = "Resolution", Content = $"{w} × {h}", Tag = (w, h),
+            });
+    }
+
+    private void LoadDisplaySettings()
+    {
+        var display = new DisplaySettings(_state);
+        var available = display.Available;
+        DisplayPanel.Visibility = available ? Visibility.Visible : Visibility.Collapsed;
+        DisplayUnavailable.Visibility = available ? Visibility.Collapsed : Visibility.Visible;
+        if (!available) return;
+        try
+        {
+            var (mode, w, h) = display.Read();
+            (mode switch { WindowMode.Fullscreen => ModeFullscreen, WindowMode.Borderless => ModeBorderless, _ => ModeWindowed }).IsChecked = true;
+            foreach (var choice in ResolutionChoices.Children.OfType<RadioButton>())
+                choice.IsChecked = choice.Tag is ValueTuple<int, int> r && r.Item1 == w && r.Item2 == h;
+        }
+        catch (IOException) { }
+    }
+
+    private void OnSaveDisplay(object sender, RoutedEventArgs e)
+    {
+        var mode = ModeFullscreen.IsChecked == true ? WindowMode.Fullscreen : ModeBorderless.IsChecked == true ? WindowMode.Borderless : WindowMode.Windowed;
+        if (ResolutionChoices.Children.OfType<RadioButton>().FirstOrDefault(c => c.IsChecked == true)?.Tag is not ValueTuple<int, int> r)
+        {
+            DisplayNote.Text = "Önce bir çözünürlük seç.";
+            return;
+        }
+        try
+        {
+            new DisplaySettings(_state).Write(mode, r.Item1, r.Item2);
+            DisplayNote.Text = "Kaydedildi. Oyunu bir sonraki açışında geçerli olur.";
+        }
+        catch (IOException ex) { DisplayNote.Text = $"Kaydedilemedi: {ex.Message}"; }
+    }
+
+    private async void OnRepair(object sender, RoutedEventArgs e)
+    {
+        if (_feed is null || !_state.IsInstalled) return;
+        var ok = false;
+        await RunWorkAsync(async ct =>
+        {
+            SetPhase("Dosyalar onarılıyor", null, "Her dosya kontrol ediliyor; bozuk ya da eksik olanlar yeniden indirilecek.");
+            await new GameInstaller(_http, _state).InstallAsync(_feed, InstallProgressReporter(), ct);
+            ok = true;
+        });
+        if (ok) SetPhase("Dosyalar onarıldı", null, "Her şey yerinde.");
+    }
+
+    private async Task UpdateCacheSizeAsync()
+    {
+        var dir = _state.DownloadsDir;
+        var bytes = await Task.Run(() =>
+            Directory.Exists(dir) ? new DirectoryInfo(dir).EnumerateFiles("*", SearchOption.AllDirectories).Sum(f => f.Length) : 0);
+        CacheText.Text = bytes == 0
+            ? "İndirilmiş mod arşivi yok."
+            : $"İndirilen mod arşivleri {bytes / 1073741824.0:0.0} GB yer kaplıyor. Silersen oyun çalışmaya devam eder; bir sonraki güncellemede gerekenler yeniden indirilir.";
+        ClearCacheButton.Visibility = bytes == 0 ? Visibility.Collapsed : Visibility.Visible;
+    }
+
+    private async void OnClearCache(object sender, RoutedEventArgs e)
+    {
+        if (MessageBox.Show(this, "İndirilen mod arşivleri silinsin mi?", "Skyrim Online TR", MessageBoxButton.YesNo) != MessageBoxResult.Yes) return;
+        await Task.Run(() =>
+        {
+            foreach (var file in Directory.EnumerateFiles(_state.DownloadsDir, "*", SearchOption.AllDirectories))
+                try { File.Delete(file); } catch (IOException) { } catch (UnauthorizedAccessException) { }
+        });
+        await UpdateCacheSizeAsync();
+    }
+
+    private void OnOpenInstallDir(object sender, RoutedEventArgs e) => OpenFolder(_state.InstallRoot);
+
+    private void OnOpenCrashLogs(object sender, RoutedEventArgs e) =>
+        OpenFolder(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "My Games", "Skyrim Special Edition", "SKSE"));
+
+    private void OnOpenLauncherLogs(object sender, RoutedEventArgs e) => OpenFolder(LauncherConfig.AppDataDir);
+
+    private void OpenFolder(string dir)
+    {
+        if (Directory.Exists(dir)) Open(dir);
+        else SetPhase("Klasör bulunamadı", null, $"{dir} henüz oluşmamış.");
+    }
+
+    private static void Open(string target) => Process.Start(new ProcessStartInfo(target) { UseShellExecute = true });
 
     // ---------- Chrome ----------
 
