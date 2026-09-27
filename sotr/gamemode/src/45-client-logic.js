@@ -13,6 +13,7 @@ function sotrAdminClient(ctx, cfg) {
 
   const setOpen = (v) => {
     open = v;
+    if (v) sp.browser.setVisible(true);
     sp.browser.executeJavaScript('(' + cfg.panelSrc + ')(' + v + ')');
     sp.browser.setFocused(v);
     if (v) ctx.sendEvent({ op: 'init' });
@@ -122,6 +123,7 @@ function sotrProgClient(ctx, cfg) {
   };
   const setSkillsOpen = (v) => {
     skillsOpen = v;
+    if (v) sp.browser.setVisible(true);
     sp.browser.executeJavaScript('(' + cfg.skillPanelSrc + ')(' + v + ')');
     sp.browser.setFocused(v);
     if (v) pushSkillPanel();
