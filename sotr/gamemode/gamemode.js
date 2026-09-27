@@ -278,6 +278,11 @@ const PERKS = {
   juggernaut: [0xbcd2a, 0x7935e, 0x79361, 0x79362, 0x79374],
   shieldWall: [0xbccae, 0x79355, 0x79356, 0x79357, 0x79358],
   elementalProtection: [0x58f69],
+  savageStrike: [0x3af81],
+  devastatingBlow: [0x52d52],
+  backstab: [0x58210],
+  assassinsBlade: [0x58211],
+  deadlyAim: [0x1036f0],
   steadyHand: [0x103ada, 0x103adb],
   quickReflexes: [0xd8c33],
 };
@@ -338,8 +343,10 @@ const computeBonus = (actor, prog) => {
     def: r(Math.max(0.5, def)),
     magicDef: rankOf(perks, 'elementalProtection') ? 0.85 : 1,
     block: r(Math.max(0.4, 1 - (0.3 * Math.max(0, (s.Block || 15) - 15)) / 85 - 0.04 * rankOf(perks, 'shieldWall') - (rankOf(perks, 'quickReflexes') ? 0.2 : 0))),
-    power: 1,
-    sneak: 1,
+    // Savage Strike (tek el) ve Devastating Blow (iki el) power attack'e +%25; sunucu çarpanı silah türüne bakmadığı için ortak
+    power: r(1 + 0.25 * (rankOf(perks, 'savageStrike') + rankOf(perks, 'devastatingBlow'))),
+    // Sunucu tabanı gizli saldırıda x1,3; oyundaki x6/x15 çok oyunculuda fazla güçlü, ölçülü tutuldu
+    sneak: r(Math.min(3, 1 + 0.5 * rankOf(perks, 'backstab') + 0.5 * rankOf(perks, 'deadlyAim') + 1 * rankOf(perks, 'assassinsBlade'))),
     atk: {
       oneHanded: r(skillMult(s.OneHanded) * (1 + 0.2 * rankOf(perks, 'armsman'))),
       twoHanded: r(skillMult(s.TwoHanded) * (1 + 0.2 * rankOf(perks, 'barbarian'))),
