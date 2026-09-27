@@ -89,6 +89,52 @@ void RestoreActorValuePatched(MpActor* actor, espm::ActorValue actorValue,
   actor->UpdateNextRestorationTime(std::chrono::seconds{ 5 });
 }
 
+// Skyrim Online TR: passive health regeneration is off (healRate is 0 on the
+// server and the client), so regeneration potions would multiply zero. The
+// server heals the actor itself while such an effect lasts; the client just
+// shows the values it receives, so there is no rollback. A newer potion
+// replaces the running one.
+std::unordered_map<uint32_t, uint32_t> g_healthRegenGeneration;
+
+void HealthRegenTick(WorldState* worldState, uint32_t formId,
+                     uint32_t generation, float percentPerSecond,
+                     int remainingSeconds)
+{
+  if (remainingSeconds <= 0 || g_healthRegenGeneration[formId] != generation) {
+    return;
+  }
+  worldState->SetTimer(std::chrono::seconds(1)).Then([=](Viet::Void) {
+    if (g_healthRegenGeneration[formId] != generation) {
+      return;
+    }
+    const auto& form = worldState->LookupFormById(formId);
+    auto* actor = form ? form->AsActor() : nullptr;
+    if (!actor || actor->IsDead()) {
+      return;
+    }
+    const float maxHealth =
+      actor->GetMaximumValues().GetValue(espm::ActorValue::Health);
+    actor->RestoreActorValue(espm::ActorValue::Health,
+                             maxHealth * percentPerSecond / 100.f);
+    HealthRegenTick(worldState, formId, generation, percentPerSecond,
+                    remainingSeconds - 1);
+  });
+}
+
+void StartHealthRegen(MpActor& actor, float percentPerSecond,
+                      int durationSeconds)
+{
+  if (percentPerSecond <= 0.f || durationSeconds <= 0) {
+    return;
+  }
+  const uint32_t formId = actor.GetFormId();
+  const uint32_t generation = ++g_healthRegenGeneration[formId];
+  spdlog::info("Health regen effect for {:x}: {}% per second for {} s", formId,
+               percentPerSecond, durationSeconds);
+  HealthRegenTick(actor.GetParent(), formId, generation, percentPerSecond,
+                  durationSeconds);
+}
+
 }
 
 void MpActor::UpdateNextRestorationTime(std::chrono::seconds duration) noexcept
@@ -1872,6 +1918,22 @@ void MpActor::ApplyMagicEffect(espm::Effects::Effect& effect, bool hasSweetpie,
     } else {
       RestoreActorValuePatched(this, av, effect.magnitude);
     }
+  }
+
+  // HealRate magnitude is percent of max health per second. HealRateMult is a
+  // percent bonus on the race rate, which counts as the base here because
+  // passive regeneration itself is disabled.
+  if (!durationOverriden && effect.duration > 0 &&
+      (av == espm::ActorValue::HealRate ||
+       av == espm::ActorValue::HealRateMult_or_CombatHealthRegenMultMod)) {
+    float percentPerSecond = effect.magnitude;
+    if (av != espm::ActorValue::HealRate) {
+      const float raceRegen =
+        espm::GetData<espm::RACE>(GetRaceId(), worldState).healRegen;
+      percentPerSecond = raceRegen * (1.f + effect.magnitude / 100.f);
+    }
+    StartHealthRegen(*this, percentPerSecond,
+                     static_cast<int>(effect.duration));
   }
 
   if (isRate || isMult) {
