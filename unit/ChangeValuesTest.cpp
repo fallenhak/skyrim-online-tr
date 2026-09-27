@@ -155,8 +155,8 @@ TEST_CASE("OnChangeValues function sends ChangeValues message with new "
   REQUIRE(partOne.Messages().size() == 1);
   nlohmann::json message = partOne.Messages()[0].j;
 
-  REQUIRE(message["data"]["health"] != 0.0f);
-  REQUIRE(message["data"]["health"] != 1.0f);
+  // Passive health regeneration is disabled: health stays where it was
+  REQUIRE(message["data"]["health"] == 0.0f);
   REQUIRE(message["data"]["magicka"] != 0.0f);
   REQUIRE(message["data"]["magicka"] != 1.0f);
   REQUIRE(message["data"]["stamina"] != 0.0f);
