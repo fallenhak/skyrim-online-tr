@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
@@ -36,8 +37,40 @@ public static partial class GameRunner
         psi.ArgumentList.Add("-p");
         psi.ArgumentList.Add(LauncherConfig.Mo2Profile);
         psi.ArgumentList.Add($"moshortcut://:{LauncherConfig.Mo2ExecutableTitle}");
-        Process.Start(psi);
+        var mo2 = Process.Start(psi);
+        if (mo2 is not null) _ = HideMo2LockWindowAsync(mo2, state);
     }
+
+    /// <summary>
+    /// moshortcut:// makes MO2 wait with ForceWait, which shows its "locked" window even with
+    /// lock_gui=false. MO2 must stay alive for the VFS, so its windows are hidden once the game runs.
+    /// </summary>
+    private static async Task HideMo2LockWindowAsync(Process mo2, InstallState state)
+    {
+        using (mo2)
+        {
+            while (!mo2.HasExited)
+            {
+                if (IsGameRunning(state))
+                {
+                    EnumWindows((hwnd, _) =>
+                    {
+                        GetWindowThreadProcessId(hwnd, out var pid);
+                        if (pid == (uint)mo2.Id && IsWindowVisible(hwnd)) ShowWindow(hwnd, SwHide);
+                        return true;
+                    }, IntPtr.Zero);
+                }
+                await Task.Delay(500);
+            }
+        }
+    }
+
+    private const int SwHide = 0;
+    private delegate bool EnumWindowsProc(IntPtr hwnd, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern bool EnumWindows(EnumWindowsProc callback, IntPtr lParam);
+    [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hwnd, out uint pid);
+    [DllImport("user32.dll")] private static extern bool IsWindowVisible(IntPtr hwnd);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr hwnd, int cmd);
 
     /// <summary>
     /// SkyrimPlatform writes its temporary save to My Games\...\Saves; with MO2 profile-local
