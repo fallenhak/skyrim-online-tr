@@ -828,12 +828,13 @@ void GrantRestoreAllowance(MpActor& caster, uint32_t spellId,
       std::abs(effect.effectItem->magnitude) * kRestoreMagnitudeMargin;
     if (data.spellItem->castType == espm::SPEL::CastType::Concentration) {
       allowance.rate[idx] = std::max(allowance.rate[idx], magnitude);
-      allowance.rateUntil = now + std::chrono::seconds(kMaxConcentrationSeconds);
+      allowance.rateUntil =
+        now + std::chrono::seconds(kMaxConcentrationSeconds);
     } else if (effect.effectItem->duration > 1) {
       allowance.rate[idx] = std::max(allowance.rate[idx], magnitude);
-      allowance.rateUntil = std::max(
-        allowance.rateUntil,
-        now + std::chrono::seconds(effect.effectItem->duration + 1));
+      allowance.rateUntil =
+        std::max(allowance.rateUntil,
+                 now + std::chrono::seconds(effect.effectItem->duration + 1));
     } else {
       allowance.lump[idx] += magnitude;
     }
@@ -936,8 +937,8 @@ void ActionListener::OnChangeValues(const RawMessageData& rawMsgData,
     if (!MathUtils::IsNearlyEqual(newVal, *inputVal)) {
       spdlog::info("OnChangeValues - {:x} av {} corrected: client {} -> {} "
                    "(stored {}, period {})",
-                   actor->GetFormId(), static_cast<int>(av), *inputVal,
-                   newVal, currentVal, timeAfterRegeneration);
+                   actor->GetFormId(), static_cast<int>(av), *inputVal, newVal,
+                   currentVal, timeAfterRegeneration);
       outVal = newVal;
       sendOutMsg = true;
     }
@@ -1483,12 +1484,12 @@ void ActionListener::OnWeaponHit(MpActor* aggressor,
   // regeneration since then, otherwise every hit undoes the regen the victim
   // already sees on screen and the bar jumps down by more than the damage.
   {
-    const float period = CropPeriodAfterLastRegen(
-      targetActor
-        .GetDurationOfAttributesPercentagesUpdate(
-          std::chrono::steady_clock::now())
-        .count(),
-      10.f, 0.f);
+    const float period =
+      CropPeriodAfterLastRegen(targetActor
+                                 .GetDurationOfAttributesPercentagesUpdate(
+                                   std::chrono::steady_clock::now())
+                                 .count(),
+                               10.f, 0.f);
     currentActorValues.healthPercentage =
       CropHealthRegeneration(1.f, period, &targetActor);
   }
