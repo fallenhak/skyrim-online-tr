@@ -392,8 +392,8 @@ const grantXp = (actor, amount, reason) => {
 };
 
 // NPC seviyesi: ACBS (PC seviye çarpanı destekli); şablonlu kayıtlarda editörId'deki 01..06 seviyesinden tahmin
-const npcLevel = (ref, playerLvl) => {
-  const rec = recordOf(baseIdOf(ref));
+const npcLevelOfBase = (baseId, playerLvl) => {
+  const rec = recordOf(baseId);
   const acbs = fieldOf(rec, 'ACBS');
   let lvl = 0;
   if (acbs && acbs.data.length >= 14) {
@@ -412,6 +412,8 @@ const npcLevel = (ref, playerLvl) => {
   }
   return Math.max(1, lvl);
 };
+
+const npcLevel = (ref, playerLvl) => npcLevelOfBase(baseIdOf(ref), playerLvl);
 
 const XP_SHARE_RANGE = 4000;
 const killXp = (victimLvl, playerLvl) => {
@@ -1119,3 +1121,12 @@ register('sotrProg', () => mp.makeProperty('sotrProg', ownerOnly("ctx.sp.storage
 register('sotrBonus', () => mp.makeProperty('sotrBonus', ownerOnly('')));
 
 console.log(`[sotr] gamemode yüklendi: ${familySummary().length} yaratık ailesi, ${SKILLS.length} beceri`);
+
+// Açılışta ESM ayrıştırmasını doğrula (seviye ve zırh tipi)
+{
+  const pick = (re) => catalog.find((c) => re.test(c.name));
+  const samples = [pick(/^EncWolf$/), pick(/^EncDraugr01Melee1H/), pick(/^EncDraugr05/), pick(/^EncBandit03Boss/)].filter(Boolean);
+  const lv = samples.map((c) => `${c.name}=${npcLevelOfBase(c.id, 1)}/${npcLevelOfBase(c.id, 20)}`).join(', ');
+  const armor = [[0x12e49, 'IronCuirass'], [0x3619e, 'LeatherCuirass']].map(([id, n]) => `${n}=${armorTypeOf(id)}`).join(', ');
+  console.log(`[sotr] öz-denetim: seviye (oyuncu 1/20) ${lv}; zırh tipi ${armor}`);
+}

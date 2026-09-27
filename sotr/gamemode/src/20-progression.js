@@ -141,8 +141,8 @@ const grantXp = (actor, amount, reason) => {
 };
 
 // NPC seviyesi: ACBS (PC seviye çarpanı destekli); şablonlu kayıtlarda editörId'deki 01..06 seviyesinden tahmin
-const npcLevel = (ref, playerLvl) => {
-  const rec = recordOf(baseIdOf(ref));
+const npcLevelOfBase = (baseId, playerLvl) => {
+  const rec = recordOf(baseId);
   const acbs = fieldOf(rec, 'ACBS');
   let lvl = 0;
   if (acbs && acbs.data.length >= 14) {
@@ -161,6 +161,8 @@ const npcLevel = (ref, playerLvl) => {
   }
   return Math.max(1, lvl);
 };
+
+const npcLevel = (ref, playerLvl) => npcLevelOfBase(baseIdOf(ref), playerLvl);
 
 const XP_SHARE_RANGE = 4000;
 const killXp = (victimLvl, playerLvl) => {
