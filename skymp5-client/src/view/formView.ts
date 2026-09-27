@@ -556,7 +556,7 @@ export class FormView {
         const headScreenPos = worldPointToScreenPoint([
           NetImmerse.getNodeWorldPositionX(refr, headPart, false),
           NetImmerse.getNodeWorldPositionY(refr, headPart, false),
-          NetImmerse.getNodeWorldPositionZ(refr, headPart, false) + 32
+          NetImmerse.getNodeWorldPositionZ(refr, headPart, false) + 64
         ])[0];
         const resolution = getScreenResolution();
         const textXPos = Math.round(headScreenPos[0] * resolution.width);
