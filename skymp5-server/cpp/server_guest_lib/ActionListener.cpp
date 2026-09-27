@@ -20,6 +20,7 @@
 #include <fmt/format.h>
 #include <fmt/ranges.h>
 #include <spdlog/spdlog.h>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "CustomPacketMessage.h"
@@ -768,6 +769,114 @@ void ActionListener::OnCustomEvent(const RawMessageData& rawMsgData,
   }
 }
 
+namespace {
+// Self-cast restore spells (Healing, Fast Healing, ...) are not applied by the
+// server, so the regen crop used to reject the healed value and the HUD bar
+// jumped back. Remember what the last restore spell may add and let
+// OnChangeValues accept that much on top of normal regeneration.
+struct RestoreAllowance
+{
+  float lump[3] = { 0.f, 0.f, 0.f }; // points, fire-and-forget
+  float rate[3] = { 0.f, 0.f, 0.f }; // points per second, concentration/DoT
+  std::chrono::steady_clock::time_point rateUntil;
+};
+std::unordered_map<uint32_t, RestoreAllowance> g_restoreAllowances;
+
+int RestoreAvIndex(espm::ActorValue av)
+{
+  switch (av) {
+    case espm::ActorValue::Health:
+      return 0;
+    case espm::ActorValue::Magicka:
+      return 1;
+    case espm::ActorValue::Stamina:
+      return 2;
+    default:
+      return -1;
+  }
+}
+
+// Perks and dual casting can raise the magnitude; stay generous.
+constexpr float kRestoreMagnitudeMargin = 2.f;
+constexpr int kMaxConcentrationSeconds = 30;
+
+void GrantRestoreAllowance(MpActor& caster, uint32_t spellId,
+                           WorldState& worldState)
+{
+  const auto data = espm::GetData<espm::SPEL>(spellId, &worldState);
+  if (!data.spellItem) {
+    return;
+  }
+  const auto now = std::chrono::steady_clock::now();
+  auto& allowance = g_restoreAllowances[caster.GetFormId()];
+  for (const auto& effect : data.effects) {
+    if (!effect.effectItem || effect.effectFormId == 0) {
+      continue;
+    }
+    const auto mgefData =
+      espm::GetData<espm::MGEF>(effect.effectFormId, &worldState).data;
+    if (mgefData.effectType != espm::MGEF::EffectType::ValueMod ||
+        mgefData.IsFlagSet(espm::MGEF::Flags::Detrimental) ||
+        mgefData.IsFlagSet(espm::MGEF::Flags::Hostile)) {
+      continue;
+    }
+    const int idx = RestoreAvIndex(mgefData.primaryAV);
+    if (idx < 0) {
+      continue;
+    }
+    const float magnitude =
+      std::abs(effect.effectItem->magnitude) * kRestoreMagnitudeMargin;
+    if (data.spellItem->castType == espm::SPEL::CastType::Concentration) {
+      allowance.rate[idx] = std::max(allowance.rate[idx], magnitude);
+      allowance.rateUntil = now + std::chrono::seconds(kMaxConcentrationSeconds);
+    } else if (effect.effectItem->duration > 1) {
+      allowance.rate[idx] = std::max(allowance.rate[idx], magnitude);
+      allowance.rateUntil = std::max(
+        allowance.rateUntil,
+        now + std::chrono::seconds(effect.effectItem->duration + 1));
+    } else {
+      allowance.lump[idx] += magnitude;
+    }
+    spdlog::info("Restore allowance for {:x}: spell {:x}, av {}, {} points",
+                 caster.GetFormId(), spellId, idx, magnitude);
+  }
+}
+
+// Extra percentage the client may legitimately report for av; consumes it.
+float TakeRestoreAllowance(MpActor& actor, espm::ActorValue av,
+                           float wantedPercentage, float periodSeconds)
+{
+  auto it = g_restoreAllowances.find(actor.GetFormId());
+  const int idx = RestoreAvIndex(av);
+  if (it == g_restoreAllowances.end() || idx < 0 || wantedPercentage <= 0.f) {
+    return 0.f;
+  }
+  auto& allowance = it->second;
+  const float maxValue = actor.GetMaximumValues().GetValue(av);
+  if (maxValue <= 0.f) {
+    return 0.f;
+  }
+  float points = allowance.lump[idx];
+  const auto now = std::chrono::steady_clock::now();
+  // A little slack after the cast stops for the last in-flight update
+  if (now < allowance.rateUntil + std::chrono::seconds(3)) {
+    points += allowance.rate[idx] * periodSeconds;
+  }
+  const float granted = std::min(wantedPercentage, points / maxValue);
+  allowance.lump[idx] =
+    std::max(0.f, allowance.lump[idx] - granted * maxValue);
+  return granted;
+}
+
+void StopRestoreConcentration(uint32_t casterId)
+{
+  auto it = g_restoreAllowances.find(casterId);
+  if (it != g_restoreAllowances.end()) {
+    it->second.rateUntil = std::chrono::steady_clock::now();
+  }
+}
+}
+
 void ActionListener::OnChangeValues(const RawMessageData& rawMsgData,
                                     const ChangeValuesMessage& msg)
 {
@@ -819,7 +928,16 @@ void ActionListener::OnChangeValues(const RawMessageData& rawMsgData,
       newVal = CropMagickaRegeneration(newVal, timeAfterRegeneration, actor);
     }
 
+    if (newVal < *inputVal) {
+      newVal += TakeRestoreAllowance(*actor, av, *inputVal - newVal,
+                                     timeAfterRegeneration);
+    }
+
     if (!MathUtils::IsNearlyEqual(newVal, *inputVal)) {
+      spdlog::info("OnChangeValues - {:x} av {} corrected: client {} -> {} "
+                   "(stored {}, period {})",
+                   actor->GetFormId(), static_cast<int>(av), *inputVal,
+                   newVal, currentVal, timeAfterRegeneration);
       outVal = newVal;
       sendOutMsg = true;
     }
@@ -996,8 +1114,14 @@ bool CanHit(const MpActor& actor, const HitData& hitData,
 
   if (weapDNAM) {
     float speedMult = weapDNAM->speed;
-    return timePassed.count() >= (1.1 * (1 / speedMult)) -
+    const float vanillaMin = (1.1 * (1 / speedMult)) -
       (1.1 * (1 / speedMult) * (speedMult <= 0.75 ? 0.45 : 0.3));
+    // The vanilla estimate rejected legit combos (light attack followed by
+    // a power attack, Precision chains). Keep only an anti-macro floor.
+    constexpr float kComboFactor = 0.4f;
+    constexpr float kMinHitInterval = 0.25f;
+    return timePassed.count() >=
+      std::max(kMinHitInterval, vanillaMin * kComboFactor);
   }
 
   throw std::runtime_error(
@@ -1192,7 +1316,12 @@ void ActionListener::OnSpellCast(const RawMessageData& rawMsgData,
   SendToNeighbours(myActor->idx, rawMsgData);
 
   if (spellCastData.interruptCast) {
+    StopRestoreConcentration(caster->GetFormId());
     return;
+  }
+
+  if (spellCastData.target == caster->GetFormId()) {
+    GrantRestoreAllowance(*caster, spellCastData.spell, partOne.worldState);
   }
 
   auto& browser = partOne.worldState.GetEspm().GetBrowser();
@@ -1350,6 +1479,19 @@ void ActionListener::OnWeaponHit(MpActor* aggressor,
 
   ActorValues currentActorValues = targetActor.GetChangeForm().actorValues;
 
+  // The stored value is the client's last report (up to ~2 s old). Add the
+  // regeneration since then, otherwise every hit undoes the regen the victim
+  // already sees on screen and the bar jumps down by more than the damage.
+  {
+    const float period = CropPeriodAfterLastRegen(
+      targetActor
+        .GetDurationOfAttributesPercentagesUpdate(
+          std::chrono::steady_clock::now())
+        .count(),
+      10.f, 0.f);
+    currentActorValues.healthPercentage =
+      CropHealthRegeneration(1.f, period, &targetActor);
+  }
   float healthPercentage = currentActorValues.healthPercentage;
 
   if (targetActor.IsBlockActive()) {
