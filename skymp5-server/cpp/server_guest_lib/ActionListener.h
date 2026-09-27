@@ -101,10 +101,12 @@ private:
   // Returns user's actor if there is attached one
   MpActor* SendToNeighbours(uint32_t idx, Networking::UserId userId,
                             Networking::PacketData data, size_t length,
-                            bool reliable);
+                            bool reliable, bool skipHoster = false);
 
+  // skipHoster: when a hoster updates an NPC it hosts, do not echo the
+  // update back to the hoster (it already applied it locally)
   MpActor* SendToNeighbours(uint32_t idx, const RawMessageData& rawMsgData,
-                            bool reliable = false);
+                            bool reliable = false, bool skipHoster = false);
 
   PartOne& partOne;
 

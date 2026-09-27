@@ -42,7 +42,8 @@ uint32_t LongToNormal(uint64_t longFormId)
 MpActor* ActionListener::SendToNeighbours(uint32_t idx,
                                           Networking::UserId userId,
                                           Networking::PacketData data,
-                                          size_t length, bool reliable)
+                                          size_t length, bool reliable,
+                                          bool skipHoster)
 {
   MpActor* myActor = partOne.serverState.ActorByUser(userId);
   // The old behavior is doing nothing in that case. This is covered by tests
@@ -88,7 +89,13 @@ MpActor* ActionListener::SendToNeighbours(uint32_t idx,
     }
   }
 
+  const bool isHostedUpdate = idx != myActor->GetIdx();
   for (auto listener : actor->GetActorListeners()) {
+    // Echoing a hosted NPC's animation back to its hoster replays it on the
+    // hoster's local actor (attack loops, equipment re-applied mid-combat)
+    if (skipHoster && isHostedUpdate && listener == myActor) {
+      continue;
+    }
     auto targetuserId = partOne.serverState.UserByActor(listener);
     if (targetuserId != Networking::InvalidUserId) {
       partOne.GetSendTarget().Send(targetuserId, data, length, reliable);
@@ -100,10 +107,10 @@ MpActor* ActionListener::SendToNeighbours(uint32_t idx,
 
 MpActor* ActionListener::SendToNeighbours(uint32_t idx,
                                           const RawMessageData& rawMsgData,
-                                          bool reliable)
+                                          bool reliable, bool skipHoster)
 {
   return SendToNeighbours(idx, rawMsgData.userId, rawMsgData.unparsed,
-                          rawMsgData.unparsedLength, reliable);
+                          rawMsgData.unparsedLength, reliable, skipHoster);
 }
 
 void ActionListener::OnCustomPacket(const RawMessageData& rawMsgData,
@@ -194,7 +201,7 @@ void ActionListener::OnUpdateAnimation(const RawMessageData& rawMsgData,
     return;
   }
 
-  auto targetActor = SendToNeighbours(msg.idx, rawMsgData);
+  auto targetActor = SendToNeighbours(msg.idx, rawMsgData, false, true);
 
   if (!targetActor) {
     return;
@@ -374,7 +381,7 @@ void ActionListener::OnUpdateEquipment(const RawMessageData& rawMsgData,
   }
 
   if (isAllowed) {
-    SendToNeighbours(msg.idx, rawMsgData, true);
+    SendToNeighbours(msg.idx, rawMsgData, true, true);
     actor->SetEquipment(data);
   } else {
     actor->SendInventoryUpdate();
