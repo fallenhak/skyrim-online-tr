@@ -200,6 +200,11 @@ const onProgEvent = (actor, msg) => {
   if (!msg || !isPlayer(actor)) return;
   let prog = getProg(actor);
   if (msg.op === 'hello') {
+    // Oyunun kendi level eşiği sunucununkiyle aynı olmalı (bir mod GMST'leri değiştirmiş olabilir)
+    const want = [1, 2, 10].map(xpForLevel);
+    if (Array.isArray(msg.need) && msg.need.length === 3 && msg.need.some((v, i) => Math.abs(v - want[i]) > 0.5)) {
+      console.log(`[sotr-prog] UYARI: istemcinin level eşikleri farklı: ${msg.need.join('/')} (sunucu ${want.join('/')})`);
+    }
     if (!prog) {
       prog = newProg(msg.skills);
       console.log(`[sotr-prog] ${actorName(actor)} için ilerleme kaydı açıldı`);

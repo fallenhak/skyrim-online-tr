@@ -181,7 +181,9 @@ function sotrProgClient(ctx, cfg) {
       disableSkillUse();
       const skills = {};
       for (const [id] of SKILLS) skills[id] = player().getBaseActorValue(id);
-      ctx.sendEvent({ op: 'hello', skills });
+      let need = [];
+      try { need = [1, 2, 10].map((l) => sp.Game.getExperienceForLevel(l)); } catch (err) { /* yoksay */ }
+      ctx.sendEvent({ op: 'hello', skills, need });
     }
     const p = prog();
     if (!helloSent || !p) return;
