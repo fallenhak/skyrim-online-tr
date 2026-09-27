@@ -227,6 +227,25 @@ void MpActor::EquipBestWeapon()
     newEq.inv.AddItems({ bestEntry });
   }
 
+  // Unchanged equipment must not be re-sent: clients answer every equipment
+  // update with applyEquipment (remove all + re-add), which drops the weapon
+  // a hosted NPC is drawing (e.g. on host start)
+  auto sortedEntries = [](std::vector<Inventory::Entry> entries) {
+    std::sort(entries.begin(), entries.end(),
+              [](const Inventory::Entry& a, const Inventory::Entry& b) {
+                return a.baseId < b.baseId;
+              });
+    return entries;
+  };
+  Equipment sameCounter = newEq;
+  sameCounter.numChanges = eq.numChanges;
+  sameCounter.inv.entries = sortedEntries(newEq.inv.entries);
+  Equipment current = eq;
+  current.inv.entries = sortedEntries(eq.inv.entries);
+  if (sameCounter == current) {
+    return;
+  }
+
   SetEquipment(newEq);
 
   UpdateEquipmentMessage msg;
