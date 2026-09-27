@@ -1590,12 +1590,10 @@ void MpActor::DamageActorValueWithoutSync(espm::ActorValue av, float value)
         values.healthPercentage = CropValue(values.healthPercentage + delta);
         break;
       case espm::ActorValue::Stamina:
-        values.staminaPercentage =
-          CropValue(values.staminaPercentage + delta);
+        values.staminaPercentage = CropValue(values.staminaPercentage + delta);
         break;
       case espm::ActorValue::Magicka:
-        values.magickaPercentage =
-          CropValue(values.magickaPercentage + delta);
+        values.magickaPercentage = CropValue(values.magickaPercentage + delta);
         break;
       default:
         break;
