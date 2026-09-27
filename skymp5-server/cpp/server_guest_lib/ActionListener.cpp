@@ -777,8 +777,17 @@ void ActionListener::OnChangeValues(const RawMessageData& rawMsgData,
   }
 
   const auto now = std::chrono::steady_clock::now();
-  const float timeAfterRegeneration = CropPeriodAfterLastRegen(
-    actor->GetDurationOfAttributesPercentagesUpdate(now).count());
+  // The client sends values every ~2 s over an unreliable channel, so the
+  // real period is usually slightly above 2 s. The default crop (max 2 s,
+  // otherwise 1 s) then removed half of the legit regen every update and the
+  // HUD bars jumped back. Allow up to 10 s plus some network jitter.
+  constexpr float kMaxRegenPeriod = 10.f;
+  constexpr float kNetworkJitterSeconds = 0.5f;
+  const float timeAfterRegeneration =
+    CropPeriodAfterLastRegen(
+      actor->GetDurationOfAttributesPercentagesUpdate(now).count(),
+      kMaxRegenPeriod, kMaxRegenPeriod) +
+    kNetworkJitterSeconds;
 
   const auto& currentValues = actor->GetActorValues();
 

@@ -159,6 +159,9 @@ public:
 
   void RestoreActorValue(espm::ActorValue av, float value);
   void DamageActorValue(espm::ActorValue av, float value);
+  // Server-side bookkeeping only: the owner's game already spent this value
+  // itself, sending the server's (older) value back makes the HUD jump.
+  void DamageActorValueWithoutSync(espm::ActorValue av, float value);
   void SetActorValue(espm::ActorValue actorValue, float value);
 
   // TODO: only used in legacy MGEF implementation, remove when MGEF is

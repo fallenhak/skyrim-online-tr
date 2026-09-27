@@ -1580,6 +1580,29 @@ void MpActor::DamageActorValue(espm::ActorValue av, float value)
     av, -std::abs(value) / GetMaximumValues().GetValue(av));
 }
 
+void MpActor::DamageActorValueWithoutSync(espm::ActorValue av, float value)
+{
+  const float delta = -std::abs(value) / GetMaximumValues().GetValue(av);
+  EditChangeForm([&](MpChangeForm& changeForm) {
+    auto& values = changeForm.actorValues;
+    switch (av) {
+      case espm::ActorValue::Health:
+        values.healthPercentage = CropValue(values.healthPercentage + delta);
+        break;
+      case espm::ActorValue::Stamina:
+        values.staminaPercentage =
+          CropValue(values.staminaPercentage + delta);
+        break;
+      case espm::ActorValue::Magicka:
+        values.magickaPercentage =
+          CropValue(values.magickaPercentage + delta);
+        break;
+      default:
+        break;
+    }
+  });
+}
+
 BaseActorValues MpActor::GetBaseValues()
 {
   return GetBaseActorValues(GetParent(), GetBaseId(), GetRaceId(),
