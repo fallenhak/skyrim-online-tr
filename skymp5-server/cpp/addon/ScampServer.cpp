@@ -14,6 +14,7 @@
 #include "condition_functions/ConditionFunctionFactory.h"
 #include "formulas/DamageMultConditionalFormula.h"
 #include "formulas/DamageMultFormula.h"
+#include "formulas/SotrBonusFormula.h"
 #include "formulas/SweetPieDamageFormula.h"
 #include "formulas/SweetPieSpellDamageFormula.h"
 #include "formulas/TES5DamageFormula.h"
@@ -385,6 +386,7 @@ ScampServer::ScampServer(const Napi::CallbackInfo& info)
       std::move(formula), damageMultConditionalFormulaSettings,
       conditionsEvaluatorSettings,
       std::make_shared<ConditionFunctionMap>(conditionFunctionMap));
+    formula = std::make_unique<SotrBonusFormula>(std::move(formula));
     partOne->SetDamageFormula(std::move(formula));
 
     partOne->worldState.AttachScriptStorage(

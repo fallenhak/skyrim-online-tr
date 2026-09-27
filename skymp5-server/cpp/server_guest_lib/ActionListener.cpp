@@ -11,6 +11,7 @@
 #include "MpObjectReference.h"
 #include "MsgType.h"
 #include "Overloaded.h"
+#include "SotrBonus.h"
 #include "WorldState.h"
 #include "gamemode_events/CustomEvent.h"
 #include "gamemode_events/EatItemEvent.h"
@@ -1010,9 +1011,10 @@ float CalculateCurrentHealthPercentage(const MpActor& actor, float damage,
   const uint32_t raceId = actor.GetRaceId();
   WorldState* espmProvider = actor.GetParent();
 
-  const float baseHealth =
-    GetBaseActorValues(espmProvider, baseId, raceId, actor.GetTemplateChain())
-      .health;
+  BaseActorValues baseValues =
+    GetBaseActorValues(espmProvider, baseId, raceId, actor.GetTemplateChain());
+  ApplySotrBonus(actor, baseValues);
+  const float baseHealth = baseValues.health;
 
   if (outBaseHealth) {
     *outBaseHealth = baseHealth;

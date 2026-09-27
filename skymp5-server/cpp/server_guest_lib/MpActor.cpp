@@ -12,6 +12,7 @@
 #include "MpChangeForms.h"
 #include "MsgType.h"
 #include "ServerState.h"
+#include "SotrBonus.h"
 #include "SpSnippet.h"
 #include "SpSnippetFunctionGen.h"
 #include "WorldState.h"
@@ -425,6 +426,7 @@ void MpActor::VisitProperties(CreateActorMessage& message,
   if (worldState && worldState->HasEspm()) {
     baseActorValues = GetBaseActorValues(worldState, baseId, raceId,
                                          ChangeForm().templateChain);
+    ApplySotrBonus(*this, baseActorValues);
   }
 
   MpChangeForm changeForm = GetChangeForm();
@@ -1668,8 +1670,10 @@ void MpActor::DamageActorValueWithoutSync(espm::ActorValue av, float value)
 
 BaseActorValues MpActor::GetBaseValues()
 {
-  return GetBaseActorValues(GetParent(), GetBaseId(), GetRaceId(),
-                            ChangeForm().templateChain);
+  BaseActorValues values = GetBaseActorValues(
+    GetParent(), GetBaseId(), GetRaceId(), ChangeForm().templateChain);
+  ApplySotrBonus(*this, values);
+  return values;
 }
 
 BaseActorValues MpActor::GetMaximumValues()
@@ -1957,8 +1961,7 @@ void MpActor::ApplyMagicEffect(espm::Effects::Effect& effect, bool hasSweetpie,
 
   if (isRate || isMult) {
     MpChangeForm changeForm = GetChangeForm();
-    BaseActorValues baseValues = GetBaseActorValues(
-      GetParent(), GetBaseId(), GetRaceId(), changeForm.templateChain);
+    BaseActorValues baseValues = GetBaseValues();
     const ActiveMagicEffectsMap& activeEffects = changeForm.activeMagicEffects;
     const float baseValue = baseValues.GetValue(av);
     const uint32_t formId = GetFormId();
@@ -2038,8 +2041,7 @@ void MpActor::ApplyMagicEffects(std::vector<espm::Effects::Effect>& effects,
 void MpActor::RemoveMagicEffect(const espm::ActorValue actorValue)
 {
   try {
-    const ActorValues baseActorValues = GetBaseActorValues(
-      GetParent(), GetBaseId(), GetRaceId(), ChangeForm().templateChain);
+    const ActorValues baseActorValues = GetBaseValues();
     const float baseActorValue = baseActorValues.GetValue(actorValue);
     SetActorValue(actorValue, baseActorValue);
     EditChangeForm([actorValue](MpChangeForm& changeForm) {
@@ -2054,8 +2056,7 @@ void MpActor::RemoveMagicEffect(const espm::ActorValue actorValue)
 void MpActor::RemoveAllMagicEffects()
 {
   try {
-    const ActorValues baseActorValues = GetBaseActorValues(
-      GetParent(), GetBaseId(), GetRaceId(), ChangeForm().templateChain);
+    const ActorValues baseActorValues = GetBaseValues();
     SetActorValues(baseActorValues);
     EditChangeForm(
       [](MpChangeForm& changeForm) { changeForm.activeMagicEffects.Clear(); });

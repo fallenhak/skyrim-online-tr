@@ -3,6 +3,7 @@
 #include "MathUtils.h"
 #include "MpActor.h"
 #include "MpChangeForms.h"
+#include "SotrBonus.h"
 
 namespace {
 
@@ -12,8 +13,10 @@ BaseActorValues GetValues(MpActor* actor)
   auto appearance = actor->GetAppearance();
   uint32_t raceId = appearance ? appearance->raceId : 0;
   auto worldState = actor->GetParent();
-  return GetBaseActorValues(worldState, baseId, raceId,
-                            actor->GetTemplateChain());
+  BaseActorValues values =
+    GetBaseActorValues(worldState, baseId, raceId, actor->GetTemplateChain());
+  ApplySotrBonus(*actor, values);
+  return values;
 }
 
 }
