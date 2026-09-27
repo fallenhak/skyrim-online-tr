@@ -130,3 +130,76 @@ const dropLoot = (victim, killer) => {
     try { dropLoot(victim, killer); } catch (e) { console.log('[sotr-loot] hata', e && e.message); }
   };
 }
+
+// ---------------------------------------------------------------------------
+// Kademeli sandıklar: Treas* sandıklar açılınca, bekleme süresi dolduysa ganimetle dolar.
+// Seviye: açan oyuncunun leveli; boss sandıkları daha yüksek kademeden atar.
+// ---------------------------------------------------------------------------
+
+const CHEST_FILE = process.cwd() + '/sotr-chests.json';
+let chestFilled = {};
+try { chestFilled = JSON.parse(fs.readFileSync(CHEST_FILE, 'utf8')); } catch (e) { /* ilk açılış */ }
+let chestDirty = false;
+every(60000, () => {
+  if (!chestDirty) return;
+  chestDirty = false;
+  try { fs.writeFileSync(CHEST_FILE, JSON.stringify(chestFilled)); } catch (e) { console.log('[sotr-loot] sandık kaydı yazılamadı', e && e.message); }
+});
+
+const CHEST_SKIP_RE = /EMPTY|NoRespawn|HouseNoble|CWMission|Burnt|Corpse/;
+const chestKind = (ed) => {
+  if (!/^Treas/.test(ed) || CHEST_SKIP_RE.test(ed)) return null;
+  if (/Boss/.test(ed)) return { kind: 'boss', rolls: 4, cooldownH: 6 };
+  if (/Chest|StrongBox|JewelryBox/.test(ed)) return { kind: 'chest', rolls: 2, cooldownH: 2 };
+  return { kind: 'small', rolls: 1, cooldownH: 1 };
+};
+
+const chestLoot = (lvl, spec) => {
+  const out = [[I.gold, rint(5 + lvl, 15 + lvl * (spec.kind === 'boss' ? 8 : spec.kind === 'chest' ? 4 : 1))]];
+  const tiers = TIER_TABLES.filter((t) => lvl >= t.min);
+  for (let i = 0; i < spec.rolls; i++) {
+    // Yüksek kademeler daha nadir: sondan başa, kendi şanslarıyla
+    for (let j = tiers.length - 1; j >= 0; j--) {
+      if (Math.random() < tiers[j].chance * 1.5 || j === 0) {
+        const [id, a, b] = pick(tiers[j].items);
+        out.push([id, rint(a, b)]);
+        break;
+      }
+    }
+  }
+  let rare = false;
+  for (const c of CHASE) {
+    if (lvl >= c.min && Math.random() < c.chance * (spec.kind === 'boss' ? 4 : 1)) {
+      const [id, a, b] = pick(c.items);
+      out.push([id, rint(a, b)]);
+      rare = true;
+    }
+  }
+  return { out, rare };
+};
+
+const onChestActivate = (ref, caster) => {
+  if (!isPlayer(caster)) return;
+  const rec = recordOf(baseIdOf(ref));
+  if (!rec || rec.type !== 'CONT') return;
+  const spec = chestKind(rec.editorId || '');
+  if (!spec) return;
+  const key = ref.toString(16);
+  const now = Date.now();
+  if (chestFilled[key] && now - chestFilled[key] < spec.cooldownH * 3600000) return;
+  chestFilled[key] = now;
+  chestDirty = true;
+  const prog = getProg(caster);
+  const plvl = (prog && prog.lvl) || 1;
+  const lvl = spec.kind === 'boss' ? Math.max(plvl + 8, 16) : plvl;
+  const { out, rare } = chestLoot(lvl, spec);
+  addToInventory(ref, out);
+  if (rare) notify(caster, '✨ Sandıkta nadir bir şey parlıyor!');
+  console.log(`[sotr-loot] sandık ${rec.editorId} ${key} (sv ${lvl}) ${actorName(caster)}: ${out.map(([id, n]) => `${id.toString(16)}×${n}`).join(' ')}${rare ? ' NADİR' : ''}`);
+};
+
+// Başka onActivate kullanan yok; sıcak yüklemede zincir büyümesin diye doğrudan atanır.
+mp.onActivate = (ref, caster) => {
+  try { onChestActivate(ref, caster); } catch (e) { console.log('[sotr-loot] sandık hatası', e && e.message); }
+  return true;
+};
