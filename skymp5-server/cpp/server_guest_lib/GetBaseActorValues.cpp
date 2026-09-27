@@ -74,7 +74,10 @@ BaseActorValues GetBaseActorValues(WorldState* worldState, uint32_t baseId,
     actorValues.stamina = 100.f;
   }
 
-  actorValues.healRate = raceData.healRegen;
+  // Skyrim Online TR: no passive health regeneration. The client applies
+  // this rate to the player, so with 0 the HUD never shows regen that the
+  // server would roll back. Healing comes from potions and spells only.
+  actorValues.healRate = 0.f;
   actorValues.magickaRate = raceData.magickaRegen;
   actorValues.staminaRate = raceData.staminaRegen;
 
