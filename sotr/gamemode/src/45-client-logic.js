@@ -99,6 +99,12 @@ function sotrProgClient(ctx, cfg) {
       const want = p.skills[id];
       if (typeof want === 'number' && Math.round(pl.getBaseActorValue(id)) !== want) pl.setActorValue(id, want);
     }
+    if (p.av) {
+      const AVN = { h: 'Health', m: 'Magicka', s: 'Stamina' };
+      for (const k of ['h', 'm', 's']) {
+        if (typeof p.av[k] === 'number' && Math.round(pl.getBaseActorValue(AVN[k])) !== Math.round(p.av[k])) pl.setActorValue(AVN[k], p.av[k]);
+      }
+    }
     if (p.seq !== lastApplied || dirty) {
       const owned = ownedPerks();
       const want = p.perks.filter((id) => REPLACED.indexOf(id) < 0);
@@ -168,8 +174,10 @@ function sotrProgClient(ctx, cfg) {
     sp.Ui.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
     // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
     sp.Ui.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
-    sp.Ui.invokeForm(LEVELUP, CALL + 'setPlayer', player());
+    // getPlayer() önbellekli nesne döndürüyor ve invokeForm'da "Invalid _skyrimPlatform_indexInPool" veriyor; her seferinde taze form
+    try { sp.Ui.invokeForm(LEVELUP, CALL + 'setPlayer', sp.Game.getFormEx(0x14)); } catch (err) { if (!feedErr) { feedErr = true; diag('level ekranı setPlayer ' + err); } }
   };
+  let feedErr = false;
   sp.on('modEvent', (e) => {
     if (e.eventName !== 'SSL_SkillsDistributionCompleted') return;
     const diffs = ('' + e.strArg).split(';').map((x) => Math.max(0, parseInt(x, 10) || 0));

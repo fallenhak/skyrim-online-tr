@@ -394,9 +394,28 @@ const pushBonus = (actor, prog) => {
   try { old = mp.get(actor, 'sotrBonus'); } catch (e) { /* yok */ }
   if (JSON.stringify(old) !== JSON.stringify(bonus)) mp.set(actor, 'sotrBonus', bonus);
 };
+// Oyuncunun temel can/büyü/dayanıklılığı (sunucunun GetBaseActorValues'u gibi: ırk DATA + oyuncu NPC'si 0x7 ACBS farkı)
+const playerBaseAv = (actor) => {
+  try {
+    const app = mp.get(actor, 'appearance');
+    const race = recordOf(app && app.raceId ? app.raceId >>> 0 : 0x13746);
+    const data = fieldOf(race, 'DATA');
+    const acbs = fieldOf(recordOf(0x7), 'ACBS');
+    if (!data || data.data.length < 48 || !acbs) return null;
+    return { h: f32(data.data, 36) + s16(acbs.data, 20), m: f32(data.data, 40) + s16(acbs.data, 4), s: f32(data.data, 44) + s16(acbs.data, 6) };
+  } catch (e) {
+    return null;
+  }
+};
 const saveProg = (actor, prog) => {
   prog.seq = ++progSeq;
   prog.need = xpForLevel(prog.lvl);
+  // İstemci temel değerleri buna eşitler (level ekranında seçilen artışlar sunucudaki attrs'tan gelir)
+  const base = playerBaseAv(actor);
+  if (base) {
+    const at = prog.attrs || {};
+    prog.av = { h: base.h + ATTR_PER_LEVEL * (at.h || 0), m: base.m + ATTR_PER_LEVEL * (at.m || 0), s: base.s + ATTR_PER_LEVEL * (at.s || 0) };
+  }
   mp.set(actor, 'sotrProg', prog);
   pushBonus(actor, prog);
 };
@@ -1077,6 +1096,12 @@ function sotrProgClient(ctx, cfg) {
       const want = p.skills[id];
       if (typeof want === 'number' && Math.round(pl.getBaseActorValue(id)) !== want) pl.setActorValue(id, want);
     }
+    if (p.av) {
+      const AVN = { h: 'Health', m: 'Magicka', s: 'Stamina' };
+      for (const k of ['h', 'm', 's']) {
+        if (typeof p.av[k] === 'number' && Math.round(pl.getBaseActorValue(AVN[k])) !== Math.round(p.av[k])) pl.setActorValue(AVN[k], p.av[k]);
+      }
+    }
     if (p.seq !== lastApplied || dirty) {
       const owned = ownedPerks();
       const want = p.perks.filter((id) => REPLACED.indexOf(id) < 0);
@@ -1146,8 +1171,10 @@ function sotrProgClient(ctx, cfg) {
     sp.Ui.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
     // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
     sp.Ui.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
-    sp.Ui.invokeForm(LEVELUP, CALL + 'setPlayer', player());
+    // getPlayer() önbellekli nesne döndürüyor ve invokeForm'da "Invalid _skyrimPlatform_indexInPool" veriyor; her seferinde taze form
+    try { sp.Ui.invokeForm(LEVELUP, CALL + 'setPlayer', sp.Game.getFormEx(0x14)); } catch (err) { if (!feedErr) { feedErr = true; diag('level ekranı setPlayer ' + err); } }
   };
+  let feedErr = false;
   sp.on('modEvent', (e) => {
     if (e.eventName !== 'SSL_SkillsDistributionCompleted') return;
     const diffs = ('' + e.strArg).split(';').map((x) => Math.max(0, parseInt(x, 10) || 0));
