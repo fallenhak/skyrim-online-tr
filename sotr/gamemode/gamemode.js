@@ -262,6 +262,22 @@ const SKILLS = [
   ['Restoration', 'İyileştirme'], ['Enchanting', 'Büyüleme'],
 ];
 const SKILL_IDS = SKILLS.map((s) => s[0]);
+// Perk ağaçlarındaki tüm perkler: Skyrim.esm AVIF kayıtlarının PNAM alanları (istemci sahipliği hasPerk ile süzer)
+const TREE_PERKS = (() => {
+  const out = [];
+  for (let id = 0x3e8; id < 0x600; id++) {
+    const rec = recordOf(id);
+    if (!rec || !/^AV/.test(rec.editorId || '')) continue;
+    for (const f of rec.fields || []) {
+      if (f.type === 'PNAM' && f.data.length >= 4) {
+        const perk = u32(f.data, 0);
+        if (perk && !out.includes(perk)) out.push(perk);
+      }
+    }
+  }
+  return out;
+})();
+console.log(`[sotr] perk ağaçları: ${TREE_PERKS.length} perk`);
 const SKILL_POINTS_PER_LEVEL = 10;
 const SKILL_MAX = 100;
 const ATTR_PER_LEVEL = 10; // Skyrim'in level ekranındaki +10 can/büyü/dayanıklılık
@@ -423,14 +439,47 @@ const npcLevelOfBase = (baseId, playerLvl) => {
 
 const npcLevel = (ref, playerLvl) => npcLevelOfBase(baseIdOf(ref), playerLvl);
 
+// NPC'nin temel canı, sunucunun GetBaseActorValues hesabıyla aynı: ırk başlangıç canı + ACBS can farkı.
+// Şablon zinciri (templateChain) UseTraits (0x01) ve UseStats (0x02) bayraklarına göre izlenir.
+const f32 = (d, o) => Buffer.from(d.slice(o, o + 4)).readFloatLE(0);
+const s16 = (d, o) => { const v = u16(d, o); return v & 0x8000 ? v - 0x10000 : v; };
+const evalTemplate = (chain, flag) => {
+  for (const id of chain) {
+    const rec = recordOf(id);
+    const acbs = fieldOf(rec, 'ACBS');
+    if (!acbs || acbs.data.length < 22) return null;
+    if (!fieldOf(rec, 'TPLT') || !(u16(acbs.data, 18) & flag)) return rec;
+  }
+  return null;
+};
+const npcHealth = (ref) => {
+  let chain = [];
+  try { chain = (mp.get(ref, 'templateChain') || []).map((x) => x >>> 0); } catch (e) { /* yok */ }
+  return healthOfChain(chain.length ? chain : [baseIdOf(ref)]);
+};
+const healthOfChain = (chain) => {
+  try {
+    const traits = evalTemplate(chain, 0x01);
+    const stats = evalTemplate(chain, 0x02);
+    const rnam = fieldOf(traits, 'RNAM');
+    const race = rnam ? recordOf(u32(rnam.data, 0)) : null;
+    const data = fieldOf(race, 'DATA');
+    if (!stats || !data || data.data.length < 40) return 0;
+    const hp = f32(data.data, 36) + s16(fieldOf(stats, 'ACBS').data, 20);
+    return hp > 0 ? hp : 0;
+  } catch (e) {
+    return 0;
+  }
+};
+
 const XP_SHARE_RANGE = 4000;
 // Genel XP hızı (2026-10-02, Burak: "her şey çok XP veriyor"): level 1'de ~20 kurt ya da ~7 draugr bir level eder
-const XP_RATE = 0.5;
-const killXp = (victimLvl, playerLvl) => {
-  // Kendinden çok zayıf yaratıklar az XP verir
-  const base = 5 + victimLvl * 2;
-  const mult = Math.max(0.1, Math.min(1.3, 1 + (victimLvl - playerLvl) * 0.05));
-  return base * mult * XP_RATE;
+// 2026-10-02 (Burak: "draugr ile skeever aynı XP'yi veriyor"): XP yaratığın canından; seviye kayıtları güç göstermiyor.
+// Can: skeever ~12, kurt ~25, draugr ~90, ayı ~200, ejderha 1000+. Level 1'de ~12 kurt ya da ~5 draugr bir level eder.
+const XP_RATE = 1;
+const killXp = (victimHp, victimLvl) => {
+  const base = victimHp > 0 ? 3 + victimHp / 5 : (5 + victimLvl * 2) * 0.5;
+  return base * XP_RATE;
 };
 
 mp.onDeath = (victim, killer) => {
@@ -450,9 +499,10 @@ mp.onDeath = (victim, killer) => {
       const prog = getProg(p);
       if (!prog) continue;
       const vl = npcLevel(victim, prog.lvl);
-      const amount = killXp(vl, prog.lvl) * share;
+      const hp = npcHealth(victim);
+      const amount = killXp(hp, vl) * share;
       grantXp(p, amount, share < 1 ? 'grup' : '');
-      console.log(`[sotr-prog] ${actorName(p)} ${victim.toString(16)} (seviye ${vl}) için ${amount.toFixed(1)} XP aldı`);
+      console.log(`[sotr-prog] ${actorName(p)} ${victim.toString(16)} (can ${Math.round(hp)}, seviye ${vl}) için ${amount.toFixed(1)} XP aldı`);
     }
   } catch (e) {
     console.log('[sotr-prog] onDeath hatası', e && e.message);
@@ -975,18 +1025,14 @@ function sotrProgClient(ctx, cfg) {
   const player = () => sp.Game.getPlayer();
   const avi = (id) => sp.ActorValueInfo.getActorValueInfoByName(id);
   const perkForm = (id) => sp.Perk.from(sp.Game.getFormEx(id));
-  // Ağacın tüm perklerini al, sahipliği hasPerk ile kendimiz süz (getPerks'in sahiplik süzgecine güvenme)
   const diag = (m) => { log(m); try { ctx.sendEvent({ op: 'diag', text: '' + m }); } catch (err) { /* yoksay */ } };
+  // Sahip olunan perkler: sunucunun ESM'den okuduğu ağaç perkleri (cfg.treePerks) hasPerk ile süzülür
   const ownedPerks = () => {
     const out = [];
     const pl = player();
-    for (const [id] of SKILLS) {
-      let list = null;
-      try { const a = avi(id); list = a ? a.getPerks(null, false, true) : null; } catch (err) { diag('getPerks ' + id + ': ' + err); }
-      for (const p of list || []) {
-        const pk = sp.Perk.from(p);
-        if (pk && pl.hasPerk(pk) && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
-      }
+    for (const id of cfg.treePerks) {
+      const pk = perkForm(id);
+      if (pk && pl.hasPerk(pk)) out.push(id);
     }
     return out;
   };
@@ -1093,10 +1139,9 @@ function sotrProgClient(ctx, cfg) {
   const CALL = '_root.LevelUpMenu_mc.';
   let spent = SKILLS.map(() => 0);
   let menuSp = null;
+  // menuOpen olayı SWF yüklenmeden gelir; veri kısa aralıklarla birkaç kez gönderilir (oyuncu dağıtmaya başlamadan)
+  let feedAt = [];
   const feedLevelUpMenu = () => {
-    const p = prog();
-    if (!p) return;
-    menuSp = (menuSp === null ? p.sp : menuSp) + cfg.pointsPerLevel;
     sp.UI.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
     // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
     sp.UI.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
@@ -1113,7 +1158,12 @@ function sotrProgClient(ctx, cfg) {
   const MENUS = ['StatsMenu', LEVELUP];
   sp.on('menuOpen', (e) => {
     if (MENUS.indexOf(e.name) >= 0) menuOpen = true;
-    if (e.name === LEVELUP) { try { feedLevelUpMenu(); } catch (err) { diag('level ekranı ' + err); } }
+    if (e.name === LEVELUP) {
+      const p = prog();
+      menuSp = (menuSp === null ? (p ? p.sp : 0) : menuSp) + cfg.pointsPerLevel;
+      const now = Date.now();
+      feedAt = [now + 30, now + 150, now + 400, now + 800];
+    }
   });
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
@@ -1133,6 +1183,10 @@ function sotrProgClient(ctx, cfg) {
   let kWasDown = false;
   sp.on('update', () => {
     const now = Date.now();
+    if (feedAt.length && now >= feedAt[0]) {
+      feedAt.shift();
+      if (menuOpen) { try { feedLevelUpMenu(); } catch (err) { diag('level ekranı ' + err); feedAt = []; } }
+    }
     const kDown = sp.Input.isKeyPressed(K);
     if (cfg.kPanel && kDown && !kWasDown && !menuOpen && (skillsOpen || !sp.browser.isFocused())) setSkillsOpen(!skillsOpen);
     kWasDown = kDown;
@@ -1889,6 +1943,7 @@ register('_onSotrProg', () => mp.makeEventSource('_onSotrProg', clientCall(sotrP
   pointsPerLevel: SKILL_POINTS_PER_LEVEL,
   skillMax: SKILL_MAX,
   kPanel: false,
+  treePerks: TREE_PERKS,
 })));
 register('sotrAdminData', () => mp.makeProperty('sotrAdminData', ownerOnly(showOnce('sotrAdminSeq', "ctx.sp.browser.executeJavaScript('window.sotrAdminRecv && window.sotrAdminRecv(' + JSON.stringify(v) + ')');"))));
 register('sotrNotice', () => mp.makeProperty('sotrNotice', ownerOnly(showOnce('sotrNoticeSeq', 'ctx.sp.Debug.notification(v.text);'))));
@@ -1936,5 +1991,6 @@ console.log(`[sotr] gamemode yüklendi: ${familySummary().length} yaratık ailes
   const samples = [pick(/^EncWolf$/), pick(/^EncDraugr01Melee1H/), pick(/^EncDraugr05/), pick(/^EncBandit03Boss/)].filter(Boolean);
   const lv = samples.map((c) => `${c.name}=${npcLevelOfBase(c.id, 1)}/${npcLevelOfBase(c.id, 20)}`).join(', ');
   const armor = [[0x12e49, 'IronCuirass'], [0x3619e, 'LeatherCuirass']].map(([id, n]) => `${n}=${armorTypeOf(id)}`).join(', ');
-  console.log(`[sotr] öz-denetim: seviye (oyuncu 1/20) ${lv}; zırh tipi ${armor}`);
+  const hp = [pick(/^EncSkeever$/), pick(/^EncWolf$/), pick(/^EncDraugr01Melee1H/), pick(/^EncBear$/)].filter(Boolean).map((c) => `${c.name}=${Math.round(healthOfChain([c.id]))}`).join(', ');
+  console.log(`[sotr] öz-denetim: seviye (oyuncu 1/20) ${lv}; zırh tipi ${armor}; can ${hp}`);
 }

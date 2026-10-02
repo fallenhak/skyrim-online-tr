@@ -48,18 +48,14 @@ function sotrProgClient(ctx, cfg) {
   const player = () => sp.Game.getPlayer();
   const avi = (id) => sp.ActorValueInfo.getActorValueInfoByName(id);
   const perkForm = (id) => sp.Perk.from(sp.Game.getFormEx(id));
-  // Ağacın tüm perklerini al, sahipliği hasPerk ile kendimiz süz (getPerks'in sahiplik süzgecine güvenme)
   const diag = (m) => { log(m); try { ctx.sendEvent({ op: 'diag', text: '' + m }); } catch (err) { /* yoksay */ } };
+  // Sahip olunan perkler: sunucunun ESM'den okuduğu ağaç perkleri (cfg.treePerks) hasPerk ile süzülür
   const ownedPerks = () => {
     const out = [];
     const pl = player();
-    for (const [id] of SKILLS) {
-      let list = null;
-      try { const a = avi(id); list = a ? a.getPerks(null, false, true) : null; } catch (err) { diag('getPerks ' + id + ': ' + err); }
-      for (const p of list || []) {
-        const pk = sp.Perk.from(p);
-        if (pk && pl.hasPerk(pk) && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
-      }
+    for (const id of cfg.treePerks) {
+      const pk = perkForm(id);
+      if (pk && pl.hasPerk(pk)) out.push(id);
     }
     return out;
   };
@@ -166,10 +162,9 @@ function sotrProgClient(ctx, cfg) {
   const CALL = '_root.LevelUpMenu_mc.';
   let spent = SKILLS.map(() => 0);
   let menuSp = null;
+  // menuOpen olayı SWF yüklenmeden gelir; veri kısa aralıklarla birkaç kez gönderilir (oyuncu dağıtmaya başlamadan)
+  let feedAt = [];
   const feedLevelUpMenu = () => {
-    const p = prog();
-    if (!p) return;
-    menuSp = (menuSp === null ? p.sp : menuSp) + cfg.pointsPerLevel;
     sp.UI.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
     // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
     sp.UI.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
@@ -186,7 +181,12 @@ function sotrProgClient(ctx, cfg) {
   const MENUS = ['StatsMenu', LEVELUP];
   sp.on('menuOpen', (e) => {
     if (MENUS.indexOf(e.name) >= 0) menuOpen = true;
-    if (e.name === LEVELUP) { try { feedLevelUpMenu(); } catch (err) { diag('level ekranı ' + err); } }
+    if (e.name === LEVELUP) {
+      const p = prog();
+      menuSp = (menuSp === null ? (p ? p.sp : 0) : menuSp) + cfg.pointsPerLevel;
+      const now = Date.now();
+      feedAt = [now + 30, now + 150, now + 400, now + 800];
+    }
   });
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
@@ -206,6 +206,10 @@ function sotrProgClient(ctx, cfg) {
   let kWasDown = false;
   sp.on('update', () => {
     const now = Date.now();
+    if (feedAt.length && now >= feedAt[0]) {
+      feedAt.shift();
+      if (menuOpen) { try { feedLevelUpMenu(); } catch (err) { diag('level ekranı ' + err); feedAt = []; } }
+    }
     const kDown = sp.Input.isKeyPressed(K);
     if (cfg.kPanel && kDown && !kWasDown && !menuOpen && (skillsOpen || !sp.browser.isFocused())) setSkillsOpen(!skillsOpen);
     kWasDown = kDown;
