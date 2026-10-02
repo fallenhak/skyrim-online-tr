@@ -411,7 +411,8 @@ const npcLevelOfBase = (baseId, playerLvl) => {
     lvl = flags & 0x80 ? Math.min(calcMax, Math.max(calcMin, Math.round((playerLvl * raw) / 1000))) : raw;
   }
   if (lvl <= 1 && rec && rec.editorId) {
-    const m = rec.editorId.match(/[A-Za-z](\d\d)/);
+    // Yalnız ailenin ardından gelen iki haneli kademe (EncDraugr01…); "Radius1024" gibi sayılar sayılmaz
+    const m = rec.editorId.match(/^Enc[A-Za-z]+?(\d\d)(?!\d)/);
     if (m) lvl = Math.max(2, +m[1] * 4);
     else if (/Dragon|Giant|Mammoth|Troll/.test(rec.editorId)) lvl = 25;
     else if (/Bear|Sabre|Werewolf|Hagraven|Spriggan/.test(rec.editorId)) lvl = 12;
@@ -423,11 +424,13 @@ const npcLevelOfBase = (baseId, playerLvl) => {
 const npcLevel = (ref, playerLvl) => npcLevelOfBase(baseIdOf(ref), playerLvl);
 
 const XP_SHARE_RANGE = 4000;
+// Genel XP hızı (2026-10-02, Burak: "her şey çok XP veriyor"): level 1'de ~20 kurt ya da ~7 draugr bir level eder
+const XP_RATE = 0.5;
 const killXp = (victimLvl, playerLvl) => {
-  // Level 1'de ~7 kurt ya da ~3 draugr bir level eder; kendinden çok zayıf yaratıklar az XP verir
+  // Kendinden çok zayıf yaratıklar az XP verir
   const base = 5 + victimLvl * 2;
   const mult = Math.max(0.1, Math.min(1.3, 1 + (victimLvl - playerLvl) * 0.05));
-  return base * mult;
+  return base * mult * XP_RATE;
 };
 
 mp.onDeath = (victim, killer) => {
@@ -458,6 +461,7 @@ mp.onDeath = (victim, killer) => {
 
 const onProgEvent = (actor, msg) => {
   if (!msg || !isPlayer(actor)) return;
+  if (msg.op === 'diag') { console.log(`[sotr-prog] istemci ${actorName(actor)}: ${String(msg.text).slice(0, 300)}`); return; }
   let prog = getProg(actor);
   if (msg.op === 'hello') {
     // Oyunun kendi level eşiği sunucununkiyle aynı olmalı (bir mod GMST'leri değiştirmiş olabilir)
@@ -495,6 +499,7 @@ const onProgEvent = (actor, msg) => {
     console.log(`[sotr-prog] ${actorName(actor)} level ${prog.lvl} oldu (${attr})`);
   } else if (msg.op === 'perks') {
     const owned = (Array.isArray(msg.owned) ? msg.owned : []).map((x) => x >>> 0);
+    console.log(`[sotr-prog] ${actorName(actor)} perk bildirimi: istemcide ${owned.length}, kayıtta ${prog.perks.length}, puan ${prog.pp}`);
     const added = [];
     for (const id of owned) {
       if (prog.perks.includes(id)) continue;
@@ -518,6 +523,7 @@ const onProgEvent = (actor, msg) => {
     prog.skills[msg.av] += n;
     prog.sp -= n;
     saveProg(actor, prog);
+    console.log(`[sotr-prog] ${actorName(actor)} ${msg.av} +${n} → ${prog.skills[msg.av]} (kalan puan ${prog.sp})`);
   }
 };
 
@@ -957,14 +963,17 @@ function sotrProgClient(ctx, cfg) {
   const player = () => sp.Game.getPlayer();
   const avi = (id) => sp.ActorValueInfo.getActorValueInfoByName(id);
   const perkForm = (id) => sp.Perk.from(sp.Game.getFormEx(id));
+  // Ağacın tüm perklerini al, sahipliği hasPerk ile kendimiz süz (getPerks'in sahiplik süzgecine güvenme)
+  const diag = (m) => { log(m); try { ctx.sendEvent({ op: 'diag', text: '' + m }); } catch (err) { /* yoksay */ } };
   const ownedPerks = () => {
     const out = [];
+    const pl = player();
     for (const [id] of SKILLS) {
-      const a = avi(id);
-      const list = a ? a.getPerks(player(), false, false) : null;
+      let list = null;
+      try { const a = avi(id); list = a ? a.getPerks(null, false, true) : null; } catch (err) { diag('getPerks ' + id + ': ' + err); }
       for (const p of list || []) {
         const pk = sp.Perk.from(p);
-        if (pk && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
+        if (pk && pl.hasPerk(pk) && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
       }
     }
     return out;
@@ -1069,7 +1078,7 @@ function sotrProgClient(ctx, cfg) {
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
     menuOpen = false;
-    try { onMenuClosed(); } catch (err) { log('menü kapanış hatası ' + err); }
+    try { onMenuClosed(); } catch (err) { diag('menü kapanış hatası ' + err); }
   });
   sp.on('skillIncrease', () => { dirty = true; });
 

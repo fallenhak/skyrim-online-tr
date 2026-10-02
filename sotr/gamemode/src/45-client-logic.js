@@ -48,14 +48,17 @@ function sotrProgClient(ctx, cfg) {
   const player = () => sp.Game.getPlayer();
   const avi = (id) => sp.ActorValueInfo.getActorValueInfoByName(id);
   const perkForm = (id) => sp.Perk.from(sp.Game.getFormEx(id));
+  // Ağacın tüm perklerini al, sahipliği hasPerk ile kendimiz süz (getPerks'in sahiplik süzgecine güvenme)
+  const diag = (m) => { log(m); try { ctx.sendEvent({ op: 'diag', text: '' + m }); } catch (err) { /* yoksay */ } };
   const ownedPerks = () => {
     const out = [];
+    const pl = player();
     for (const [id] of SKILLS) {
-      const a = avi(id);
-      const list = a ? a.getPerks(player(), false, false) : null;
+      let list = null;
+      try { const a = avi(id); list = a ? a.getPerks(null, false, true) : null; } catch (err) { diag('getPerks ' + id + ': ' + err); }
       for (const p of list || []) {
         const pk = sp.Perk.from(p);
-        if (pk && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
+        if (pk && pl.hasPerk(pk) && out.indexOf(pk.getFormID()) < 0) out.push(pk.getFormID());
       }
     }
     return out;
@@ -160,7 +163,7 @@ function sotrProgClient(ctx, cfg) {
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
     menuOpen = false;
-    try { onMenuClosed(); } catch (err) { log('menü kapanış hatası ' + err); }
+    try { onMenuClosed(); } catch (err) { diag('menü kapanış hatası ' + err); }
   });
   sp.on('skillIncrease', () => { dirty = true; });
 
