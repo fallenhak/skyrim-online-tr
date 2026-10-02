@@ -218,6 +218,18 @@ const onProgEvent = (actor, msg) => {
     if (Array.isArray(msg.need) && msg.need.length === 3 && msg.need.some((v, i) => Math.abs(v - want[i]) > 0.5)) {
       console.log(`[sotr-prog] UYARI: istemcinin level eşikleri farklı: ${msg.need.join('/')} (sunucu ${want.join('/')})`);
     }
+    // Sıfırlama listesi: sotr-reset.json'daki profileId'ler bir sonraki girişte sıfırdan başlar (bir kerelik)
+    let pid = -1;
+    try { pid = mp.get(actor, 'profileId'); } catch (e) { /* yok */ }
+    try {
+      const file = process.cwd() + '/sotr-reset.json';
+      const list = JSON.parse(fs.readFileSync(file, 'utf8'));
+      if (Array.isArray(list) && list.includes(pid)) {
+        prog = null;
+        fs.writeFileSync(file, JSON.stringify(list.filter((x) => x !== pid)));
+        console.log(`[sotr-prog] ${actorName(actor)} (profileId ${pid}) sıfırlandı`);
+      }
+    } catch (e) { /* liste yok */ }
     if (!prog) {
       prog = newProg(msg.skills);
       console.log(`[sotr-prog] ${actorName(actor)} için ilerleme kaydı açıldı`);
