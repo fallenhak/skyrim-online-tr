@@ -150,15 +150,43 @@ function sotrProgClient(ctx, cfg) {
       for (let i = 0; i < ups; i++) ctx.sendEvent({ op: 'levelup', lvl: p.lvl + i + 1, attr: attrs[i] || 'h' });
       log('level atlama bildirildi: ' + ups + ' (' + attrs.join(',') + ')');
     }
+    // Level ekranında dağıtılan beceri puanları (sunucu puan bütçesine göre doğrular)
+    SKILLS.forEach(([id], i) => { if (spent[i] > 0) ctx.sendEvent({ op: 'skill', av: id, n: spent[i] }); });
+    spent = SKILLS.map(() => 0);
+    menuSp = null;
     ctx.sendEvent({ op: 'perks', owned: ownedPerks() });
     waitSeq = p.seq;
     waitUntil = Date.now() + 5000;
     dirty = true;
   };
 
-  const MENUS = ['StatsMenu', 'LevelUp Menu'];
+  // Level ekranı = Static Skill Leveling Rewritten'in levelupmenu.swf'i (Nexus 89940, yalnız arayüz dosyası).
+  // Modun Papyrus'u yerine menüyü biz besliyoruz: puan = sunucudaki dağıtılmamış puan + bu level'ın puanı.
+  const LEVELUP = 'LevelUp Menu';
+  const CALL = '_root.LevelUpMenu_mc.';
+  let spent = SKILLS.map(() => 0);
+  let menuSp = null;
+  const feedLevelUpMenu = () => {
+    const p = prog();
+    if (!p) return;
+    menuSp = (menuSp === null ? p.sp : menuSp) + cfg.pointsPerLevel;
+    sp.UI.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
+    // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
+    sp.UI.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
+    sp.UI.invokeForm(LEVELUP, CALL + 'setPlayer', player());
+  };
+  sp.on('modEvent', (e) => {
+    if (e.eventName !== 'SSL_SkillsDistributionCompleted') return;
+    const diffs = ('' + e.strArg).split(';').map((x) => Math.max(0, parseInt(x, 10) || 0));
+    SKILLS.forEach((_, i) => { spent[i] += diffs[i] || 0; });
+    menuSp = Math.max(0, Math.round(e.numArg));
+    log('level ekranı dağıtımı: ' + diffs.join(';') + ' kalan ' + menuSp);
+  });
+
+  const MENUS = ['StatsMenu', LEVELUP];
   sp.on('menuOpen', (e) => {
     if (MENUS.indexOf(e.name) >= 0) menuOpen = true;
+    if (e.name === LEVELUP) { try { feedLevelUpMenu(); } catch (err) { diag('level ekranı ' + err); } }
   });
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
@@ -179,7 +207,7 @@ function sotrProgClient(ctx, cfg) {
   sp.on('update', () => {
     const now = Date.now();
     const kDown = sp.Input.isKeyPressed(K);
-    if (kDown && !kWasDown && !menuOpen && (skillsOpen || !sp.browser.isFocused())) setSkillsOpen(!skillsOpen);
+    if (cfg.kPanel && kDown && !kWasDown && !menuOpen && (skillsOpen || !sp.browser.isFocused())) setSkillsOpen(!skillsOpen);
     kWasDown = kDown;
 
     if (!helloSent && now > helloAt && player()) {

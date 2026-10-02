@@ -21,6 +21,9 @@ register('_onSotrProg', () => mp.makeEventSource('_onSotrProg', clientCall(sotrP
   skills: SKILLS,
   replaced: Object.keys(REPLACED_PERKS).map(Number),
   skillPanelSrc: sotrSkillPanel.toString(),
+  pointsPerLevel: SKILL_POINTS_PER_LEVEL,
+  skillMax: SKILL_MAX,
+  kPanel: false,
 })));
 register('sotrAdminData', () => mp.makeProperty('sotrAdminData', ownerOnly(showOnce('sotrAdminSeq', "ctx.sp.browser.executeJavaScript('window.sotrAdminRecv && window.sotrAdminRecv(' + JSON.stringify(v) + ')');"))));
 register('sotrNotice', () => mp.makeProperty('sotrNotice', ownerOnly(showOnce('sotrNoticeSeq', 'ctx.sp.Debug.notification(v.text);'))));
