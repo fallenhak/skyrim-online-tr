@@ -923,6 +923,7 @@ function sotrAdminClient(ctx, cfg) {
   const setOpen = (v) => {
     open = v;
     if (v) sp.browser.setVisible(true);
+    if (v) sp.browser.executeJavaScript('window.sotrPerfMark && window.sotrPerfMark("f7",' + Date.now() + ')');
     sp.browser.executeJavaScript('(' + cfg.panelSrc + ')(' + v + ')');
     sp.browser.setFocused(v);
     if (v) ctx.sendEvent({ op: 'init' });
@@ -1473,12 +1474,50 @@ const onChat = (actor, raw) => {
   }
 };
 mp._onSotrChat = (actor, e) => {
+  if (e && typeof e.perf === 'string') { console.log(`[sotr-perf] ${actor.toString(16)} ${e.perf.slice(0, 600)}`); return; }
   try { onChat(actor, e && e.text); } catch (err) { console.log('[sotr-chat] hata', err && err.message); }
 };
 
 // --- İstemci tarafı --------------------------------------------------------
 
 /* eslint-disable no-var */
+// Ölçüm: panel açıkken kare hızı, uzun işler, tıklama→çizim ve oyun→tarayıcı gecikmesi.
+// Her 5 sn'de bir sotrPerf mesajı; sunucu logunda [sotr-perf].
+function sotrPerfProbe() {
+  if (window.sotrPerf) return;
+  var P = window.sotrPerf = { frames: 0, long: 0, longMs: 0, clicks: [], marks: [], since: Date.now() };
+  var visible = function () {
+    var ids = ['sotr-admin', 'sotr-skills'];
+    for (var i = 0; i < ids.length; i++) { var el = document.getElementById(ids[i]); if (el && el.style.display !== 'none') return ids[i]; }
+    var c = document.getElementById('sotr-chat');
+    return c && c.classList.contains('open') ? 'sotr-chat' : '';
+  };
+  var loop = function () { P.frames++; requestAnimationFrame(loop); };
+  requestAnimationFrame(loop);
+  try {
+    new PerformanceObserver(function (l) { l.getEntries().forEach(function (e) { P.long++; P.longMs += e.duration; }); }).observe({ entryTypes: ['longtask'] });
+  } catch (e) { P.noLongtask = true; }
+  document.addEventListener('mousedown', function () {
+    var t0 = performance.now();
+    requestAnimationFrame(function () { requestAnimationFrame(function () { P.clicks.push(Math.round(performance.now() - t0)); }); });
+  }, true);
+  window.sotrPerfMark = function (what, sentAt) {
+    var t0 = Date.now();
+    requestAnimationFrame(function () { P.marks.push(what + ':' + (t0 - sentAt) + '+' + (Date.now() - t0)); });
+  };
+  setInterval(function () {
+    var dt = (Date.now() - P.since) / 1000;
+    var panel = visible();
+    if (panel || P.marks.length) {
+      window.skyrimPlatform.sendMessage('sotrPerf', JSON.stringify({
+        panel: panel, fps: Math.round(P.frames / dt), long: P.long, longMs: Math.round(P.longMs), clicks: P.clicks, marks: P.marks,
+        w: innerWidth, h: innerHeight, nodes: document.getElementsByTagName('*').length, noLT: !!P.noLongtask,
+      }));
+    }
+    P.frames = 0; P.long = 0; P.longMs = 0; P.clicks = []; P.marks = []; P.since = Date.now();
+  }, 5000);
+}
+
 function sotrChatPanel() {
   if (document.getElementById('sotr-chat')) return;
   var css = ''
@@ -1554,6 +1593,7 @@ function sotrChatClient(ctx, cfg) {
     if (down && !wasDown && !open && !sp.browser.isFocused() && !sp.Utility.isInMenuMode()) {
       open = true;
       sp.browser.setVisible(true);
+      sp.browser.executeJavaScript('window.sotrPerfMark && window.sotrPerfMark("chat",' + Date.now() + ')');
       inject();
       sp.browser.setFocused(true);
       sp.browser.executeJavaScript('window.sotrChatOpen && window.sotrChatOpen()');
@@ -1563,9 +1603,11 @@ function sotrChatClient(ctx, cfg) {
   sp.on('browserMessage', (e) => {
     if (e.arguments[0] === 'sotrChatSend') ctx.sendEvent({ text: '' + e.arguments[1] });
     else if (e.arguments[0] === 'sotrChatClose' && open) { open = false; sp.browser.setFocused(false); }
+    else if (e.arguments[0] === 'sotrPerf') ctx.sendEvent({ perf: '' + e.arguments[1] });
   });
   sp.browser.setVisible(true);
   inject();
+  sp.browser.executeJavaScript('(' + cfg.probeSrc + ')()');
 }
 
 // ---------------------------------------------------------------------------
@@ -1799,7 +1841,7 @@ register('_onSotrProg', () => mp.makeEventSource('_onSotrProg', clientCall(sotrP
 register('sotrAdminData', () => mp.makeProperty('sotrAdminData', ownerOnly(showOnce('sotrAdminSeq', "ctx.sp.browser.executeJavaScript('window.sotrAdminRecv && window.sotrAdminRecv(' + JSON.stringify(v) + ')');"))));
 register('sotrNotice', () => mp.makeProperty('sotrNotice', ownerOnly(showOnce('sotrNoticeSeq', 'ctx.sp.Debug.notification(v.text);'))));
 register('sotrProg', () => mp.makeProperty('sotrProg', ownerOnly("ctx.sp.storage['sotrProg'] = ctx.value;")));
-register('_onSotrChat', () => mp.makeEventSource('_onSotrChat', clientCall(sotrChatClient, { panelSrc: sotrChatPanel.toString() })));
+register('_onSotrChat', () => mp.makeEventSource('_onSotrChat', clientCall(sotrChatClient, { panelSrc: sotrChatPanel.toString(), probeSrc: sotrPerfProbe.toString() })));
 register('sotrChat', () => mp.makeProperty('sotrChat', ownerOnly(`
   const v = ctx.value;
   if (!v || v.seq === ctx.state.sotrChatSeq) return;

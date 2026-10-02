@@ -25,7 +25,7 @@ register('_onSotrProg', () => mp.makeEventSource('_onSotrProg', clientCall(sotrP
 register('sotrAdminData', () => mp.makeProperty('sotrAdminData', ownerOnly(showOnce('sotrAdminSeq', "ctx.sp.browser.executeJavaScript('window.sotrAdminRecv && window.sotrAdminRecv(' + JSON.stringify(v) + ')');"))));
 register('sotrNotice', () => mp.makeProperty('sotrNotice', ownerOnly(showOnce('sotrNoticeSeq', 'ctx.sp.Debug.notification(v.text);'))));
 register('sotrProg', () => mp.makeProperty('sotrProg', ownerOnly("ctx.sp.storage['sotrProg'] = ctx.value;")));
-register('_onSotrChat', () => mp.makeEventSource('_onSotrChat', clientCall(sotrChatClient, { panelSrc: sotrChatPanel.toString() })));
+register('_onSotrChat', () => mp.makeEventSource('_onSotrChat', clientCall(sotrChatClient, { panelSrc: sotrChatPanel.toString(), probeSrc: sotrPerfProbe.toString() })));
 register('sotrChat', () => mp.makeProperty('sotrChat', ownerOnly(`
   const v = ctx.value;
   if (!v || v.seq === ctx.state.sotrChatSeq) return;

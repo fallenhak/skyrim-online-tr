@@ -14,6 +14,7 @@ function sotrAdminClient(ctx, cfg) {
   const setOpen = (v) => {
     open = v;
     if (v) sp.browser.setVisible(true);
+    if (v) sp.browser.executeJavaScript('window.sotrPerfMark && window.sotrPerfMark("f7",' + Date.now() + ')');
     sp.browser.executeJavaScript('(' + cfg.panelSrc + ')(' + v + ')');
     sp.browser.setFocused(v);
     if (v) ctx.sendEvent({ op: 'init' });
