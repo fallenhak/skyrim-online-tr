@@ -19,8 +19,13 @@ const TREE_PERKS = (() => {
     if (!rec || !/^AV/.test(rec.editorId || '')) continue;
     for (const f of rec.fields || []) {
       if (f.type === 'PNAM' && f.data.length >= 4) {
-        const perk = u32(f.data, 0);
-        if (perk && !out.includes(perk)) out.push(perk);
+        // Kademeler (Armsman 1/5 → 2/5 …) ayrı perk kayıtları; NNAM "sonraki kademe"yi gösterir
+        let perk = u32(f.data, 0);
+        for (let guard = 0; perk && !out.includes(perk) && guard < 10; guard++) {
+          out.push(perk);
+          const nnam = fieldOf(recordOf(perk), 'NNAM');
+          perk = nnam && nnam.data.length >= 4 ? u32(nnam.data, 0) : 0;
+        }
       }
     }
   }
