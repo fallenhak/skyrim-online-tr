@@ -127,14 +127,17 @@ function sotrVoicePanel(cfg) {
     room.on(LK.RoomEvent.TrackUnsubscribed, function (track, pub, participant) { detach(participant); });
     room.on(LK.RoomEvent.ParticipantDisconnected, detach);
     room.on(LK.RoomEvent.Disconnected, function () { V.ready = false; drawHud('bağlantı koptu'); });
+    // Eski SkyrimPlatformImpl.dll'de CEF mikrofonu açmaz (navigator.mediaDevices yok): yalnız dinle
+    var canMic = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia);
     room.connect(cfg.url, cfg.token, { autoSubscribe: true }).then(function () {
-      return room.localParticipant.setMicrophoneEnabled(true);
+      return canMic ? room.localParticipant.setMicrophoneEnabled(true) : null;
     }).then(function () {
-      V.mic = room.localParticipant.getTrackPublication(LK.Track.Source.Microphone);
+      V.mic = canMic ? room.localParticipant.getTrackPublication(LK.Track.Source.Microphone) : null;
       if (V.mic && V.mic.track) V.mic.track.mute();
       room.localParticipant.setAttributes({ mode: V.mode });
       V.ready = true;
-      drawHud();
+      V.noMic = !canMic;
+      drawHud(canMic ? null : 'mikrofon yok · yalnız dinleme');
     }).catch(function (e) { drawHud('hata: ' + (e && e.message ? e.message : e)); });
   };
   if (window.LivekitClient) start();
@@ -147,7 +150,7 @@ function sotrVoicePanel(cfg) {
   }
 
   window.sotrVoiceTalk = function (on) {
-    if (!V.ready || V.talking === on) return;
+    if (!V.ready || V.noMic || V.talking === on) return;
     V.talking = on;
     if (ctx.state === 'suspended') ctx.resume();
     if (V.mic && V.mic.track) { if (on) V.mic.track.unmute(); else V.mic.track.mute(); }
@@ -156,10 +159,11 @@ function sotrVoicePanel(cfg) {
   window.sotrVoiceMode = function () {
     V.mode = V.mode === 'normal' ? 'shout' : V.mode === 'shout' ? 'whisper' : 'normal';
     if (V.room && V.ready) V.room.localParticipant.setAttributes({ mode: V.mode });
-    drawHud();
+    drawHud(V.noMic ? 'mikrofon yok · yalnız dinleme' : null);
   };
   // Oyundan her ~100 ms: dinleyici konumu/yönü, ortam, komşuların konumu ve görüş hattı
   window.sotrVoiceTick = function (t) {
+    if (!V.ready) return;
     if (ctx.state === 'suspended') ctx.resume();
     setEnv(t.env);
     var L = ctx.listener;
