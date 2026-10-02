@@ -1143,10 +1143,10 @@ function sotrProgClient(ctx, cfg) {
   // menuOpen olayı SWF yüklenmeden gelir; veri kısa aralıklarla birkaç kez gönderilir (oyuncu dağıtmaya başlamadan)
   let feedAt = [];
   const feedLevelUpMenu = () => {
-    sp.UI.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
+    sp.Ui.invokeIntA(LEVELUP, CALL + 'setSkillCaps', SKILLS.map(() => cfg.skillMax));
     // [kullanılmıyor, bir becerinin level başına en çok artışı, puan, maliyetler 0-25/25-50/50-75/75+]
-    sp.UI.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
-    sp.UI.invokeForm(LEVELUP, CALL + 'setPlayer', player());
+    sp.Ui.invokeIntA(LEVELUP, CALL + 'setLevelingSettings', [-1, cfg.skillMax, menuSp, 1, 1, 1, 1]);
+    sp.Ui.invokeForm(LEVELUP, CALL + 'setPlayer', player());
   };
   sp.on('modEvent', (e) => {
     if (e.eventName !== 'SSL_SkillsDistributionCompleted') return;
@@ -1157,8 +1157,10 @@ function sotrProgClient(ctx, cfg) {
   });
 
   const MENUS = ['StatsMenu', LEVELUP];
+  // Level ekranı Beceriler menüsünün içinden açılır: biri kapanınca diğeri hâlâ açık olabilir
+  const openMenus = new Set();
   sp.on('menuOpen', (e) => {
-    if (MENUS.indexOf(e.name) >= 0) menuOpen = true;
+    if (MENUS.indexOf(e.name) >= 0) { openMenus.add(e.name); menuOpen = true; }
     if (e.name === LEVELUP) {
       const p = prog();
       menuSp = (menuSp === null ? (p ? p.sp : 0) : menuSp) + cfg.pointsPerLevel;
@@ -1168,6 +1170,8 @@ function sotrProgClient(ctx, cfg) {
   });
   sp.on('menuClose', (e) => {
     if (MENUS.indexOf(e.name) < 0) return;
+    openMenus.delete(e.name);
+    if (openMenus.size > 0) return;
     menuOpen = false;
     try { onMenuClosed(); } catch (err) { diag('menü kapanış hatası ' + err); }
   });
