@@ -118,7 +118,7 @@ const dropLoot = (victim, killer) => {
   const { out, rare } = rollLoot(key, lvl, boss);
   if (out.length === 0) return;
   addToInventory(victim, out);
-  if (rare && killer && isPlayer(killer)) notify(killer, '✨ Nadir bir ganimet düştü! Cesedi ara.');
+  if (rare && killer && isPlayer(killer)) notify(killer, 'Something rare dropped. Search the body.');
   console.log(`[sotr-loot] ${ed} (sv ${lvl}${boss ? ', boss' : ''}): ${out.map(([id, n]) => `${id.toString(16)}×${n}`).join(' ')}${rare ? ' NADİR' : ''}`);
 };
 
@@ -194,7 +194,7 @@ const onChestActivate = (ref, caster) => {
   const lvl = spec.kind === 'boss' ? Math.max(plvl + 8, 16) : plvl;
   const { out, rare } = chestLoot(lvl, spec);
   addToInventory(ref, out);
-  if (rare) notify(caster, '✨ Sandıkta nadir bir şey parlıyor!');
+  if (rare) notify(caster, 'Something rare glints inside the chest.');
   console.log(`[sotr-loot] sandık ${rec.editorId} ${key} (sv ${lvl}) ${actorName(caster)}: ${out.map(([id, n]) => `${id.toString(16)}×${n}`).join(' ')}${rare ? ' NADİR' : ''}`);
 };
 

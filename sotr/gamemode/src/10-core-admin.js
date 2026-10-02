@@ -63,43 +63,43 @@ if (catalog.length === 0) {
 }
 
 const FAMILIES = [
-  { key: 'wolf', name: 'Kurt', icon: '🐺', group: 'Hayvanlar', re: /^EncWolf/ },
-  { key: 'bear', name: 'Ayı', icon: '🐻', group: 'Hayvanlar', re: /^EncBear/ },
-  { key: 'sabre', name: 'Kılıçdiş', icon: '🐆', group: 'Hayvanlar', re: /^EncSabre/ },
-  { key: 'troll', name: 'Trol', icon: '👹', group: 'Hayvanlar', re: /^EncTroll/ },
-  { key: 'spider', name: 'Örümcek', icon: '🕷️', group: 'Hayvanlar', re: /^EncFrostbite/ },
-  { key: 'skeever', name: 'Skeever', icon: '🐀', group: 'Hayvanlar', re: /^EncSkeever/ },
-  { key: 'chaurus', name: 'Chaurus', icon: '🪲', group: 'Hayvanlar', re: /^EncChaurus/ },
-  { key: 'mudcrab', name: 'Çamur yengeci', icon: '🦀', group: 'Hayvanlar', re: /^EncMudcrab/ },
-  { key: 'horker', name: 'Horker', icon: '🦭', group: 'Hayvanlar', re: /^EncHorker/ },
-  { key: 'mammoth', name: 'Mamut', icon: '🦣', group: 'Hayvanlar', re: /^EncMammoth/ },
-  { key: 'giant', name: 'Dev', icon: '🗿', group: 'Hayvanlar', re: /^EncGiant/ },
-  { key: 'deer', name: 'Av hayvanı', icon: '🦌', group: 'Hayvanlar', re: /^Enc(Elk|Deer|Goat|Fox|Hare)/ },
-  { key: 'werewolf', name: 'Kurt adam', icon: '🌕', group: 'Canavarlar', re: /^EncWerewolf/ },
-  { key: 'dragon', name: 'Ejderha', icon: '🐉', group: 'Canavarlar', re: /^EncDragon(?!Priest)/ },
-  { key: 'hagraven', name: 'Hagraven', icon: '🪶', group: 'Canavarlar', re: /^EncHagraven/ },
-  { key: 'spriggan', name: 'Spriggan', icon: '🌿', group: 'Canavarlar', re: /^EncSpriggan/ },
-  { key: 'atronach', name: 'Atronach', icon: '🔥', group: 'Canavarlar', re: /^EncAtronach/ },
-  { key: 'dremora', name: 'Dremora', icon: '😈', group: 'Canavarlar', re: /^EncDremora/ },
-  { key: 'wisp', name: 'Wispmother', icon: '👻', group: 'Canavarlar', re: /^EncWisp/ },
-  { key: 'dwarven', name: 'Dwemer makinesi', icon: '⚙️', group: 'Canavarlar', re: /^EncDwarven/ },
-  { key: 'draugr', name: 'Draugr', icon: '💀', group: 'Ölümsüzler', re: /^EncDraugr/ },
-  { key: 'skeleton', name: 'İskelet', icon: '☠️', group: 'Ölümsüzler', re: /^EncSkeleton/ },
-  { key: 'dragonpriest', name: 'Ejderha rahibi', icon: '🎭', group: 'Ölümsüzler', re: /^EncDragonPriest/ },
-  { key: 'vampire', name: 'Vampir', icon: '🧛', group: 'Ölümsüzler', re: /^EncVampire/ },
-  { key: 'falmer', name: 'Falmer', icon: '👁️', group: 'Ölümsüzler', re: /^EncFalmer/ },
-  { key: 'bandit', name: 'Haydut', icon: '🗡️', group: 'İnsanlar', re: /^EncBandit/ },
-  { key: 'warlock', name: 'Büyücü', icon: '🔮', group: 'İnsanlar', re: /^EncWarlock/ },
-  { key: 'forsworn', name: 'Forsworn', icon: '🪓', group: 'İnsanlar', re: /^EncForsworn/ },
-  { key: 'thalmor', name: 'Thalmor', icon: '🦅', group: 'İnsanlar', re: /^EncThalmor/ },
-  { key: 'alikr', name: "Alik'r savaşçısı", icon: '🏜️', group: 'İnsanlar', re: /^EncAlikr/ },
-  { key: 'witch', name: 'Cadı', icon: '🧙', group: 'İnsanlar', re: /^EncWitch/ },
-  { key: 'vigilant', name: 'Stendarr gözcüsü', icon: '✝️', group: 'İnsanlar', re: /^EncVigilant/ },
-  { key: 'hunter', name: 'Avcı', icon: '🏹', group: 'İnsanlar', re: /^EncHunter/ },
+  { key: 'wolf', name: 'Wolf', group: 'Animals', re: /^EncWolf/ },
+  { key: 'bear', name: 'Bear', group: 'Animals', re: /^EncBear/ },
+  { key: 'sabre', name: 'Sabre Cat', group: 'Animals', re: /^EncSabre/ },
+  { key: 'troll', name: 'Troll', group: 'Animals', re: /^EncTroll/ },
+  { key: 'spider', name: 'Frostbite Spider', group: 'Animals', re: /^EncFrostbite/ },
+  { key: 'skeever', name: 'Skeever', group: 'Animals', re: /^EncSkeever/ },
+  { key: 'chaurus', name: 'Chaurus', group: 'Animals', re: /^EncChaurus/ },
+  { key: 'mudcrab', name: 'Mudcrab', group: 'Animals', re: /^EncMudcrab/ },
+  { key: 'horker', name: 'Horker', group: 'Animals', re: /^EncHorker/ },
+  { key: 'mammoth', name: 'Mammoth', group: 'Animals', re: /^EncMammoth/ },
+  { key: 'giant', name: 'Giant', group: 'Monsters', re: /^EncGiant/ },
+  { key: 'deer', name: 'Wildlife', group: 'Animals', re: /^Enc(Elk|Deer|Goat|Fox|Hare)/ },
+  { key: 'werewolf', name: 'Werewolf', group: 'Monsters', re: /^EncWerewolf/ },
+  { key: 'dragon', name: 'Dragon', group: 'Monsters', re: /^EncDragon(?!Priest)/ },
+  { key: 'hagraven', name: 'Hagraven', group: 'Monsters', re: /^EncHagraven/ },
+  { key: 'spriggan', name: 'Spriggan', group: 'Monsters', re: /^EncSpriggan/ },
+  { key: 'atronach', name: 'Atronach', group: 'Monsters', re: /^EncAtronach/ },
+  { key: 'dremora', name: 'Dremora', group: 'Monsters', re: /^EncDremora/ },
+  { key: 'wisp', name: 'Wispmother', group: 'Monsters', re: /^EncWisp/ },
+  { key: 'dwarven', name: 'Dwarven Automaton', group: 'Monsters', re: /^EncDwarven/ },
+  { key: 'draugr', name: 'Draugr', group: 'Undead', re: /^EncDraugr/ },
+  { key: 'skeleton', name: 'Skeleton', group: 'Undead', re: /^EncSkeleton/ },
+  { key: 'dragonpriest', name: 'Dragon Priest', group: 'Undead', re: /^EncDragonPriest/ },
+  { key: 'vampire', name: 'Vampire', group: 'Undead', re: /^EncVampire/ },
+  { key: 'falmer', name: 'Falmer', group: 'Humanoids', re: /^EncFalmer/ },
+  { key: 'bandit', name: 'Bandit', group: 'Humanoids', re: /^EncBandit/ },
+  { key: 'warlock', name: 'Mage', group: 'Humanoids', re: /^EncWarlock/ },
+  { key: 'forsworn', name: 'Forsworn', group: 'Humanoids', re: /^EncForsworn/ },
+  { key: 'thalmor', name: 'Thalmor', group: 'Humanoids', re: /^EncThalmor/ },
+  { key: 'alikr', name: "Alik'r Warrior", group: 'Humanoids', re: /^EncAlikr/ },
+  { key: 'witch', name: 'Witch', group: 'Humanoids', re: /^EncWitch/ },
+  { key: 'vigilant', name: 'Vigilant of Stendarr', group: 'Humanoids', re: /^EncVigilant/ },
+  { key: 'hunter', name: 'Hunter', group: 'Humanoids', re: /^EncHunter/ },
 ];
 const SKIP_RE = /Template|Dead|SprigganCompanion|NoScript|Summon|_Indoor/;
-const ROLE_NAMES = { melee: 'Yakın dövüş', ranged: 'Okçu', magic: 'Büyücü', boss: 'Boss' };
-const TIER_NAMES = { weak: 'Zayıf', mid: 'Orta', strong: 'Güçlü' };
+const ROLE_NAMES = { melee: 'Melee', ranged: 'Archer', magic: 'Mage', boss: 'Boss' };
+const TIER_NAMES = { weak: 'Weak', mid: 'Average', strong: 'Strong' };
 
 const roleOf = (ed) => {
   if (/Boss/.test(ed)) return 'boss';
@@ -108,29 +108,29 @@ const roleOf = (ed) => {
   return 'melee';
 };
 const tierOf = (ed) => {
-  const m = ed.match(/[A-Za-z](\d\d)/);
+  const m = ed.match(/^Enc[A-Za-z]+?(\d\d)(?!\d)/);
   if (!m) return null;
   const n = +m[1];
   return n <= 2 ? 'weak' : n <= 4 ? 'mid' : 'strong';
 };
-// "EncDraugr05Melee1HEbonyHeadF02" -> "Tek el · Ebony · ♀ (sv 05)"
+// "EncDraugr05Melee1HEbonyHeadF02" -> "One-Handed, Ebony, Female (Tier 5)"
 const NAME_WORDS = [
-  [/Melee1H/g, 'Tek el'], [/Melee2H/g, 'İki el'], [/Boss1H/g, 'Boss tek el'], [/Boss2H/g, 'Boss iki el'], [/Missile/g, 'Okçu'],
-  [/Magic/g, 'Büyücü'], [/Ambush/g, 'Pusu'], [/Tank/g, 'Kalkanlı'], [/Berserk/g, 'Çılgın'], [/Shaman/g, 'Şaman'],
-  [/Spellsword/g, 'Büyülü kılıç'], [/Fire/g, 'Ateş'], [/Ice/g, 'Buz'], [/Frost/g, 'Buz'], [/Storm/g, 'Şimşek'], [/Shock/g, 'Şimşek'],
-  [/Necro/g, 'Nekromans'], [/Atro/g, 'Atronach'], [/Conjurer/g, 'Çağırıcı'], [/Snow/g, 'Kar'], [/Cave/g, 'Mağara'], [/Red/g, 'Kızıl'],
-  [/DarkElf/g, 'Kara elf'], [/HighElf/g, 'Yüce elf'], [/WoodElf/g, 'Orman elfi'], [/Melee/g, 'Yakın dövüş'], [/Boss/g, 'Boss'],
+  [/AggroRadius\d+/g, 'Aggressive'], [/Melee1H/g, 'One-Handed'], [/Melee2H/g, 'Two-Handed'], [/Boss1H/g, 'Boss, One-Handed'], [/Boss2H/g, 'Boss, Two-Handed'], [/Missile/g, 'Archer'],
+  [/Magic/g, 'Mage'], [/Ambush/g, 'Ambush'], [/Tank/g, 'Shield'], [/Berserk/g, 'Berserker'], [/Shaman/g, 'Shaman'],
+  [/Spellsword/g, 'Spellsword'], [/Fire/g, 'Fire'], [/Ice/g, 'Frost'], [/Frost/g, 'Frost'], [/Storm/g, 'Shock'], [/Shock/g, 'Shock'],
+  [/Necro/g, 'Necromancer'], [/Atro/g, 'Atronach'], [/Conjurer/g, 'Conjurer'], [/Snow/g, 'Snow'], [/Cave/g, 'Cave'], [/Red/g, 'Red'],
+  [/DarkElf/g, 'Dark Elf'], [/HighElf/g, 'High Elf'], [/WoodElf/g, 'Wood Elf'], [/Melee/g, 'Melee'], [/Boss/g, 'Boss'],
 ];
 const friendly = (ed) => {
   let s = ed.replace(/^Enc[A-Z][a-z]+/, '');
-  const tier = (s.match(/^(\d\d)/) || [])[1];
-  s = s.replace(/^\d\d/, '');
-  const gender = /F\d*$/.test(s) ? '♀' : /[a-z]M\d*$/.test(s) ? '♂' : '';
+  const tier = (s.match(/^(\d\d)(?!\d)/) || [])[1];
+  if (tier) s = s.slice(2);
+  const gender = /F\d*$/.test(s) ? 'Female' : /[a-z]M\d*$/.test(s) ? 'Male' : '';
   s = s.replace(/[MF]\d*$/, '').replace(/Head/g, '');
-  for (const [re, tr] of NAME_WORDS) s = s.replace(re, ` ${tr} `);
-  const parts = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').split(/\s{2,}|\s(?=[A-ZÇİÖŞÜ][a-zçğıöşü]+ )/).map((x) => x.trim()).filter(Boolean);
+  for (const [re, en] of NAME_WORDS) s = s.replace(re, ` ${en}, `);
+  const parts = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').split(',').map((x) => x.trim()).filter(Boolean);
   if (gender) parts.push(gender);
-  return (parts.join(' · ') || 'Standart') + (tier ? ` (sv ${tier})` : '');
+  return (parts.join(', ') || 'Standard') + (tier ? ` (Tier ${+tier})` : '');
 };
 
 const familyVariants = new Map(); // key -> [{ id, name, role, tier }]
@@ -146,7 +146,7 @@ const familySummary = () => FAMILIES.filter((f) => familyVariants.get(f.key).len
   const list = familyVariants.get(f.key);
   const roles = [...new Set(list.map((v) => v.role))];
   const tiers = [...new Set(list.map((v) => v.tier).filter(Boolean))];
-  return { key: f.key, name: f.name, icon: f.icon, group: f.group, count: list.length, roles, tiers };
+  return { key: f.key, name: f.name, group: f.group, count: list.length, roles, tiers };
 });
 
 // ---------------------------------------------------------------------------

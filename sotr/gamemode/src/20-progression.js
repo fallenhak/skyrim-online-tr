@@ -58,9 +58,9 @@ const PERKS = {
 };
 // Çok oyunculuda çalışmayan (zamanı yavaşlatan) perkler: oyuncuda tutulmaz, yerine sunucu bonusu verilir.
 const REPLACED_PERKS = {
-  [0x103ada]: 'Keskin Nişan: yay hasarı +%25 (zaman yavaşlatma yerine)',
-  [0x103adb]: 'Keskin Nişan: yay hasarı +%25 (zaman yavaşlatma yerine)',
-  [0xd8c33]: 'Çevik Blok: blok yaparken alınan hasar %20 daha az (zaman yavaşlatma yerine)',
+  [0x103ada]: 'Steady Hand: bows deal 25% more damage (replaces time slowdown).',
+  [0x103adb]: 'Steady Hand: bows deal 25% more damage (replaces time slowdown).',
+  [0xd8c33]: 'Quick Reflexes: you take 20% less damage while blocking (replaces time slowdown).',
 };
 
 const rankOf = (perks, key) => PERKS[key].filter((id) => perks.includes(id)).length;
@@ -164,7 +164,7 @@ const grantXp = (actor, amount, reason) => {
   if (!prog || amount <= 0) return;
   prog.xp = Math.round((prog.xp + amount) * 10) / 10;
   saveProg(actor, prog);
-  const ready = prog.xp >= xpForLevel(prog.lvl) ? ' — level atlayabilirsin (Beceriler menüsü)' : '';
+  const ready = prog.xp >= xpForLevel(prog.lvl) ? ' Ready to level up.' : '';
   notify(actor, `+${Math.round(amount)} XP${reason ? ' (' + reason + ')' : ''}${ready}`);
 };
 
@@ -311,7 +311,7 @@ const onProgEvent = (actor, msg) => {
     const attr = ['h', 'm', 's'].includes(msg.attr) ? msg.attr : 'h';
     prog.attrs[attr] = (prog.attrs[attr] || 0) + 1;
     saveProg(actor, prog);
-    notify(actor, `Level ${prog.lvl}! +1 perk puanı, +${SKILL_POINTS_PER_LEVEL} beceri puanı (K ile dağıt)`);
+    notify(actor, `You reached level ${prog.lvl}.`);
     console.log(`[sotr-prog] ${actorName(actor)} level ${prog.lvl} oldu (${attr})`);
   } else if (msg.op === 'perks') {
     const owned = (Array.isArray(msg.owned) ? msg.owned : []).map((x) => x >>> 0);

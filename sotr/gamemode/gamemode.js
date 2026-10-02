@@ -63,43 +63,43 @@ if (catalog.length === 0) {
 }
 
 const FAMILIES = [
-  { key: 'wolf', name: 'Kurt', icon: '🐺', group: 'Hayvanlar', re: /^EncWolf/ },
-  { key: 'bear', name: 'Ayı', icon: '🐻', group: 'Hayvanlar', re: /^EncBear/ },
-  { key: 'sabre', name: 'Kılıçdiş', icon: '🐆', group: 'Hayvanlar', re: /^EncSabre/ },
-  { key: 'troll', name: 'Trol', icon: '👹', group: 'Hayvanlar', re: /^EncTroll/ },
-  { key: 'spider', name: 'Örümcek', icon: '🕷️', group: 'Hayvanlar', re: /^EncFrostbite/ },
-  { key: 'skeever', name: 'Skeever', icon: '🐀', group: 'Hayvanlar', re: /^EncSkeever/ },
-  { key: 'chaurus', name: 'Chaurus', icon: '🪲', group: 'Hayvanlar', re: /^EncChaurus/ },
-  { key: 'mudcrab', name: 'Çamur yengeci', icon: '🦀', group: 'Hayvanlar', re: /^EncMudcrab/ },
-  { key: 'horker', name: 'Horker', icon: '🦭', group: 'Hayvanlar', re: /^EncHorker/ },
-  { key: 'mammoth', name: 'Mamut', icon: '🦣', group: 'Hayvanlar', re: /^EncMammoth/ },
-  { key: 'giant', name: 'Dev', icon: '🗿', group: 'Hayvanlar', re: /^EncGiant/ },
-  { key: 'deer', name: 'Av hayvanı', icon: '🦌', group: 'Hayvanlar', re: /^Enc(Elk|Deer|Goat|Fox|Hare)/ },
-  { key: 'werewolf', name: 'Kurt adam', icon: '🌕', group: 'Canavarlar', re: /^EncWerewolf/ },
-  { key: 'dragon', name: 'Ejderha', icon: '🐉', group: 'Canavarlar', re: /^EncDragon(?!Priest)/ },
-  { key: 'hagraven', name: 'Hagraven', icon: '🪶', group: 'Canavarlar', re: /^EncHagraven/ },
-  { key: 'spriggan', name: 'Spriggan', icon: '🌿', group: 'Canavarlar', re: /^EncSpriggan/ },
-  { key: 'atronach', name: 'Atronach', icon: '🔥', group: 'Canavarlar', re: /^EncAtronach/ },
-  { key: 'dremora', name: 'Dremora', icon: '😈', group: 'Canavarlar', re: /^EncDremora/ },
-  { key: 'wisp', name: 'Wispmother', icon: '👻', group: 'Canavarlar', re: /^EncWisp/ },
-  { key: 'dwarven', name: 'Dwemer makinesi', icon: '⚙️', group: 'Canavarlar', re: /^EncDwarven/ },
-  { key: 'draugr', name: 'Draugr', icon: '💀', group: 'Ölümsüzler', re: /^EncDraugr/ },
-  { key: 'skeleton', name: 'İskelet', icon: '☠️', group: 'Ölümsüzler', re: /^EncSkeleton/ },
-  { key: 'dragonpriest', name: 'Ejderha rahibi', icon: '🎭', group: 'Ölümsüzler', re: /^EncDragonPriest/ },
-  { key: 'vampire', name: 'Vampir', icon: '🧛', group: 'Ölümsüzler', re: /^EncVampire/ },
-  { key: 'falmer', name: 'Falmer', icon: '👁️', group: 'Ölümsüzler', re: /^EncFalmer/ },
-  { key: 'bandit', name: 'Haydut', icon: '🗡️', group: 'İnsanlar', re: /^EncBandit/ },
-  { key: 'warlock', name: 'Büyücü', icon: '🔮', group: 'İnsanlar', re: /^EncWarlock/ },
-  { key: 'forsworn', name: 'Forsworn', icon: '🪓', group: 'İnsanlar', re: /^EncForsworn/ },
-  { key: 'thalmor', name: 'Thalmor', icon: '🦅', group: 'İnsanlar', re: /^EncThalmor/ },
-  { key: 'alikr', name: "Alik'r savaşçısı", icon: '🏜️', group: 'İnsanlar', re: /^EncAlikr/ },
-  { key: 'witch', name: 'Cadı', icon: '🧙', group: 'İnsanlar', re: /^EncWitch/ },
-  { key: 'vigilant', name: 'Stendarr gözcüsü', icon: '✝️', group: 'İnsanlar', re: /^EncVigilant/ },
-  { key: 'hunter', name: 'Avcı', icon: '🏹', group: 'İnsanlar', re: /^EncHunter/ },
+  { key: 'wolf', name: 'Wolf', group: 'Animals', re: /^EncWolf/ },
+  { key: 'bear', name: 'Bear', group: 'Animals', re: /^EncBear/ },
+  { key: 'sabre', name: 'Sabre Cat', group: 'Animals', re: /^EncSabre/ },
+  { key: 'troll', name: 'Troll', group: 'Animals', re: /^EncTroll/ },
+  { key: 'spider', name: 'Frostbite Spider', group: 'Animals', re: /^EncFrostbite/ },
+  { key: 'skeever', name: 'Skeever', group: 'Animals', re: /^EncSkeever/ },
+  { key: 'chaurus', name: 'Chaurus', group: 'Animals', re: /^EncChaurus/ },
+  { key: 'mudcrab', name: 'Mudcrab', group: 'Animals', re: /^EncMudcrab/ },
+  { key: 'horker', name: 'Horker', group: 'Animals', re: /^EncHorker/ },
+  { key: 'mammoth', name: 'Mammoth', group: 'Animals', re: /^EncMammoth/ },
+  { key: 'giant', name: 'Giant', group: 'Monsters', re: /^EncGiant/ },
+  { key: 'deer', name: 'Wildlife', group: 'Animals', re: /^Enc(Elk|Deer|Goat|Fox|Hare)/ },
+  { key: 'werewolf', name: 'Werewolf', group: 'Monsters', re: /^EncWerewolf/ },
+  { key: 'dragon', name: 'Dragon', group: 'Monsters', re: /^EncDragon(?!Priest)/ },
+  { key: 'hagraven', name: 'Hagraven', group: 'Monsters', re: /^EncHagraven/ },
+  { key: 'spriggan', name: 'Spriggan', group: 'Monsters', re: /^EncSpriggan/ },
+  { key: 'atronach', name: 'Atronach', group: 'Monsters', re: /^EncAtronach/ },
+  { key: 'dremora', name: 'Dremora', group: 'Monsters', re: /^EncDremora/ },
+  { key: 'wisp', name: 'Wispmother', group: 'Monsters', re: /^EncWisp/ },
+  { key: 'dwarven', name: 'Dwarven Automaton', group: 'Monsters', re: /^EncDwarven/ },
+  { key: 'draugr', name: 'Draugr', group: 'Undead', re: /^EncDraugr/ },
+  { key: 'skeleton', name: 'Skeleton', group: 'Undead', re: /^EncSkeleton/ },
+  { key: 'dragonpriest', name: 'Dragon Priest', group: 'Undead', re: /^EncDragonPriest/ },
+  { key: 'vampire', name: 'Vampire', group: 'Undead', re: /^EncVampire/ },
+  { key: 'falmer', name: 'Falmer', group: 'Humanoids', re: /^EncFalmer/ },
+  { key: 'bandit', name: 'Bandit', group: 'Humanoids', re: /^EncBandit/ },
+  { key: 'warlock', name: 'Mage', group: 'Humanoids', re: /^EncWarlock/ },
+  { key: 'forsworn', name: 'Forsworn', group: 'Humanoids', re: /^EncForsworn/ },
+  { key: 'thalmor', name: 'Thalmor', group: 'Humanoids', re: /^EncThalmor/ },
+  { key: 'alikr', name: "Alik'r Warrior", group: 'Humanoids', re: /^EncAlikr/ },
+  { key: 'witch', name: 'Witch', group: 'Humanoids', re: /^EncWitch/ },
+  { key: 'vigilant', name: 'Vigilant of Stendarr', group: 'Humanoids', re: /^EncVigilant/ },
+  { key: 'hunter', name: 'Hunter', group: 'Humanoids', re: /^EncHunter/ },
 ];
 const SKIP_RE = /Template|Dead|SprigganCompanion|NoScript|Summon|_Indoor/;
-const ROLE_NAMES = { melee: 'Yakın dövüş', ranged: 'Okçu', magic: 'Büyücü', boss: 'Boss' };
-const TIER_NAMES = { weak: 'Zayıf', mid: 'Orta', strong: 'Güçlü' };
+const ROLE_NAMES = { melee: 'Melee', ranged: 'Archer', magic: 'Mage', boss: 'Boss' };
+const TIER_NAMES = { weak: 'Weak', mid: 'Average', strong: 'Strong' };
 
 const roleOf = (ed) => {
   if (/Boss/.test(ed)) return 'boss';
@@ -108,29 +108,29 @@ const roleOf = (ed) => {
   return 'melee';
 };
 const tierOf = (ed) => {
-  const m = ed.match(/[A-Za-z](\d\d)/);
+  const m = ed.match(/^Enc[A-Za-z]+?(\d\d)(?!\d)/);
   if (!m) return null;
   const n = +m[1];
   return n <= 2 ? 'weak' : n <= 4 ? 'mid' : 'strong';
 };
-// "EncDraugr05Melee1HEbonyHeadF02" -> "Tek el · Ebony · ♀ (sv 05)"
+// "EncDraugr05Melee1HEbonyHeadF02" -> "One-Handed, Ebony, Female (Tier 5)"
 const NAME_WORDS = [
-  [/Melee1H/g, 'Tek el'], [/Melee2H/g, 'İki el'], [/Boss1H/g, 'Boss tek el'], [/Boss2H/g, 'Boss iki el'], [/Missile/g, 'Okçu'],
-  [/Magic/g, 'Büyücü'], [/Ambush/g, 'Pusu'], [/Tank/g, 'Kalkanlı'], [/Berserk/g, 'Çılgın'], [/Shaman/g, 'Şaman'],
-  [/Spellsword/g, 'Büyülü kılıç'], [/Fire/g, 'Ateş'], [/Ice/g, 'Buz'], [/Frost/g, 'Buz'], [/Storm/g, 'Şimşek'], [/Shock/g, 'Şimşek'],
-  [/Necro/g, 'Nekromans'], [/Atro/g, 'Atronach'], [/Conjurer/g, 'Çağırıcı'], [/Snow/g, 'Kar'], [/Cave/g, 'Mağara'], [/Red/g, 'Kızıl'],
-  [/DarkElf/g, 'Kara elf'], [/HighElf/g, 'Yüce elf'], [/WoodElf/g, 'Orman elfi'], [/Melee/g, 'Yakın dövüş'], [/Boss/g, 'Boss'],
+  [/AggroRadius\d+/g, 'Aggressive'], [/Melee1H/g, 'One-Handed'], [/Melee2H/g, 'Two-Handed'], [/Boss1H/g, 'Boss, One-Handed'], [/Boss2H/g, 'Boss, Two-Handed'], [/Missile/g, 'Archer'],
+  [/Magic/g, 'Mage'], [/Ambush/g, 'Ambush'], [/Tank/g, 'Shield'], [/Berserk/g, 'Berserker'], [/Shaman/g, 'Shaman'],
+  [/Spellsword/g, 'Spellsword'], [/Fire/g, 'Fire'], [/Ice/g, 'Frost'], [/Frost/g, 'Frost'], [/Storm/g, 'Shock'], [/Shock/g, 'Shock'],
+  [/Necro/g, 'Necromancer'], [/Atro/g, 'Atronach'], [/Conjurer/g, 'Conjurer'], [/Snow/g, 'Snow'], [/Cave/g, 'Cave'], [/Red/g, 'Red'],
+  [/DarkElf/g, 'Dark Elf'], [/HighElf/g, 'High Elf'], [/WoodElf/g, 'Wood Elf'], [/Melee/g, 'Melee'], [/Boss/g, 'Boss'],
 ];
 const friendly = (ed) => {
   let s = ed.replace(/^Enc[A-Z][a-z]+/, '');
-  const tier = (s.match(/^(\d\d)/) || [])[1];
-  s = s.replace(/^\d\d/, '');
-  const gender = /F\d*$/.test(s) ? '♀' : /[a-z]M\d*$/.test(s) ? '♂' : '';
+  const tier = (s.match(/^(\d\d)(?!\d)/) || [])[1];
+  if (tier) s = s.slice(2);
+  const gender = /F\d*$/.test(s) ? 'Female' : /[a-z]M\d*$/.test(s) ? 'Male' : '';
   s = s.replace(/[MF]\d*$/, '').replace(/Head/g, '');
-  for (const [re, tr] of NAME_WORDS) s = s.replace(re, ` ${tr} `);
-  const parts = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').split(/\s{2,}|\s(?=[A-ZÇİÖŞÜ][a-zçğıöşü]+ )/).map((x) => x.trim()).filter(Boolean);
+  for (const [re, en] of NAME_WORDS) s = s.replace(re, ` ${en}, `);
+  const parts = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/_/g, ' ').split(',').map((x) => x.trim()).filter(Boolean);
   if (gender) parts.push(gender);
-  return (parts.join(' · ') || 'Standart') + (tier ? ` (sv ${tier})` : '');
+  return (parts.join(', ') || 'Standard') + (tier ? ` (Tier ${+tier})` : '');
 };
 
 const familyVariants = new Map(); // key -> [{ id, name, role, tier }]
@@ -146,7 +146,7 @@ const familySummary = () => FAMILIES.filter((f) => familyVariants.get(f.key).len
   const list = familyVariants.get(f.key);
   const roles = [...new Set(list.map((v) => v.role))];
   const tiers = [...new Set(list.map((v) => v.tier).filter(Boolean))];
-  return { key: f.key, name: f.name, icon: f.icon, group: f.group, count: list.length, roles, tiers };
+  return { key: f.key, name: f.name, group: f.group, count: list.length, roles, tiers };
 });
 
 // ---------------------------------------------------------------------------
@@ -309,9 +309,9 @@ const PERKS = {
 };
 // Çok oyunculuda çalışmayan (zamanı yavaşlatan) perkler: oyuncuda tutulmaz, yerine sunucu bonusu verilir.
 const REPLACED_PERKS = {
-  [0x103ada]: 'Keskin Nişan: yay hasarı +%25 (zaman yavaşlatma yerine)',
-  [0x103adb]: 'Keskin Nişan: yay hasarı +%25 (zaman yavaşlatma yerine)',
-  [0xd8c33]: 'Çevik Blok: blok yaparken alınan hasar %20 daha az (zaman yavaşlatma yerine)',
+  [0x103ada]: 'Steady Hand: bows deal 25% more damage (replaces time slowdown).',
+  [0x103adb]: 'Steady Hand: bows deal 25% more damage (replaces time slowdown).',
+  [0xd8c33]: 'Quick Reflexes: you take 20% less damage while blocking (replaces time slowdown).',
 };
 
 const rankOf = (perks, key) => PERKS[key].filter((id) => perks.includes(id)).length;
@@ -415,7 +415,7 @@ const grantXp = (actor, amount, reason) => {
   if (!prog || amount <= 0) return;
   prog.xp = Math.round((prog.xp + amount) * 10) / 10;
   saveProg(actor, prog);
-  const ready = prog.xp >= xpForLevel(prog.lvl) ? ' — level atlayabilirsin (Beceriler menüsü)' : '';
+  const ready = prog.xp >= xpForLevel(prog.lvl) ? ' Ready to level up.' : '';
   notify(actor, `+${Math.round(amount)} XP${reason ? ' (' + reason + ')' : ''}${ready}`);
 };
 
@@ -562,7 +562,7 @@ const onProgEvent = (actor, msg) => {
     const attr = ['h', 'm', 's'].includes(msg.attr) ? msg.attr : 'h';
     prog.attrs[attr] = (prog.attrs[attr] || 0) + 1;
     saveProg(actor, prog);
-    notify(actor, `Level ${prog.lvl}! +1 perk puanı, +${SKILL_POINTS_PER_LEVEL} beceri puanı (K ile dağıt)`);
+    notify(actor, `You reached level ${prog.lvl}.`);
     console.log(`[sotr-prog] ${actorName(actor)} level ${prog.lvl} oldu (${attr})`);
   } else if (msg.op === 'perks') {
     const owned = (Array.isArray(msg.owned) ? msg.owned : []).map((x) => x >>> 0);
@@ -635,54 +635,54 @@ const offsetFrom = (loc, dist) => {
 };
 
 const playerAction = (actor, target, action, amount) => {
-  if (!onlinePlayers().includes(target)) return 'Oyuncu çevrimiçi değil.';
+  if (!onlinePlayers().includes(target)) return 'That player is not online.';
   const name = actorName(target);
   switch (action) {
     case 'goto':
       mp.set(actor, 'locationalData', offsetFrom(mp.get(target, 'locationalData'), 150));
-      return `${name} yanına gidildi.`;
+      return `Teleported to ${name}.`;
     case 'bring':
       mp.set(target, 'locationalData', offsetFrom(mp.get(actor, 'locationalData'), 150));
-      return `${name} yanına çekildi.`;
+      return `Brought ${name} to you.`;
     case 'heal':
       if (mp.get(target, 'isDead')) mp.set(target, 'isDead', false);
       mp.set(target, 'percentages', { health: 1, magicka: 1, stamina: 1 });
-      notify(target, 'Bir yönetici seni iyileştirdi.');
-      return `${name} iyileştirildi.`;
+      notify(target, 'An admin has healed you.');
+      return `${name} has been healed.`;
     case 'kill':
       mp.set(target, 'isDead', true);
-      return `${name} öldürüldü.`;
+      return `${name} has been killed.`;
     case 'xp': {
       const n = Math.max(1, Math.min(100000, amount | 0));
-      grantXp(target, n, 'yönetici');
+      grantXp(target, n, 'admin');
       return `${name} oyuncusuna ${n} XP verildi.`;
     }
     case 'level': {
       const prog = getProg(target);
-      if (!prog) return 'Oyuncunun ilerleme kaydı yok.';
+      if (!prog) return 'This player has no progression record.';
       const need = xpForLevel(prog.lvl) - prog.xp;
-      grantXp(target, Math.max(1, Math.ceil(need)), 'yönetici');
-      return `${name} bir level atlayabilir (Beceriler menüsünden).`;
+      grantXp(target, Math.max(1, Math.ceil(need)), 'admin');
+      return `${name} can now level up.`;
     }
     case 'resetPerks': {
       const prog = getProg(target);
-      if (!prog) return 'Oyuncunun ilerleme kaydı yok.';
+      if (!prog) return 'This player has no progression record.';
       prog.pp += prog.perks.length;
       prog.perks = [];
       saveProg(target, prog);
-      notify(target, 'Perklerin sıfırlandı; puanlar iade edildi.');
+      notify(target, 'Your perks have been reset and the points refunded.');
       return `${name} perkleri sıfırlandı.`;
     }
     case 'resetSkills': {
       const prog = getProg(target);
-      if (!prog) return 'Oyuncunun ilerleme kaydı yok.';
+      if (!prog) return 'This player has no progression record.';
       const base = prog.base || newProg(null).skills;
       let refund = 0;
       for (const id of SKILL_IDS) refund += Math.max(0, prog.skills[id] - base[id]);
       prog.skills = base;
       prog.sp += refund;
       saveProg(target, prog);
-      notify(target, `Becerilerin sıfırlandı; ${refund} puan iade edildi.`);
+      notify(target, `Your skills have been reset. ${refund} skill points refunded.`);
       return `${name} becerileri sıfırlandı (${refund} puan iade).`;
     }
     default:
@@ -716,19 +716,19 @@ mp._onSotrAdmin = (actor, msg) => {
           picks = pickVariants(msg.family, msg.role, msg.tier, n);
         }
         if (picks.length === 0) {
-          sendAdmin(actor, { type: 'toast', text: 'Bu seçime uyan yaratık yok.' });
+          sendAdmin(actor, { type: 'toast', text: 'No creatures match this selection.' });
           break;
         }
         placeNear(actor, picks.map((v) => v.id));
         console.log(`[sotr-admin] ${actorName(actor)} (profileId ${pid}) doğurdu: ${picks.map((v) => v.ed).join(', ')}`);
-        sendAdmin(actor, { type: 'toast', text: `${picks.length} yaratık doğdu: ${[...new Set(picks.map((v) => v.name))].slice(0, 3).join(', ')}` });
+        sendAdmin(actor, { type: 'toast', text: `Spawned ${picks.length}: ${[...new Set(picks.map((v) => v.name))].slice(0, 3).join('; ')}` });
         break;
       }
       case 'clear':
-        sendAdmin(actor, { type: 'toast', text: `${clearSpawned(actor)} yaratığın temizlendi.` });
+        sendAdmin(actor, { type: 'toast', text: `Removed ${clearSpawned(actor)} of your creatures.` });
         break;
       case 'clearAll':
-        sendAdmin(actor, { type: 'toast', text: `Sunucudaki ${clearAllSpawned()} doğurulmuş yaratık temizlendi.` });
+        sendAdmin(actor, { type: 'toast', text: `Removed ${clearAllSpawned()} spawned creatures.` });
         console.log(`[sotr-admin] ${actorName(actor)} tüm doğurulmuşları temizledi`);
         break;
       case 'players':
@@ -744,9 +744,9 @@ mp._onSotrAdmin = (actor, msg) => {
       case 'announce': {
         const text = `${msg.text || ''}`.trim().slice(0, 200);
         if (!text) break;
-        for (const p of onlinePlayers()) notify(p, `📢 ${text}`);
+        for (const p of onlinePlayers()) notify(p, text);
         console.log(`[sotr-admin] duyuru (${actorName(actor)}): ${text}`);
-        sendAdmin(actor, { type: 'toast', text: 'Duyuru gönderildi.' });
+        sendAdmin(actor, { type: 'toast', text: 'Announcement sent.' });
         break;
       }
       default:
@@ -773,70 +773,67 @@ function sotrAdminPanel(show) {
   if (!show) { if (root) root.style.display = 'none'; return; }
   if (root) { root.style.display = 'flex'; return; }
 
+  // Skyrim menü dili: siyah yarı saydam zemin, ince gri çizgiler, büyük harfli dar başlıklar; gradyan, gölge ve yuvarlak köşe yok
   var css = ''
-    + '#sotr-admin{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99999;font:14px "Segoe UI",sans-serif;color:#eadfc8}'
-    + '#sotr-admin .win{width:820px;height:560px;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(28,24,19,.97),rgba(16,14,11,.97));border:1px solid #9c8352;border-radius:10px;box-shadow:0 12px 50px rgba(0,0,0,.7)}'
-    + '#sotr-admin .top{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #4a3f2c;font-size:17px;letter-spacing:.5px}'
-    + '#sotr-admin .top b{color:#e6c77f}#sotr-admin .top .x{margin-left:auto;cursor:pointer;opacity:.7;font-size:18px}#sotr-admin .top .x:hover{opacity:1}'
+    + '#sotr-admin{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:99999;background:rgba(0,0,0,.35);'
+    + 'font:15px "Futura Condensed","Futura","Arial Narrow","Roboto Condensed",sans-serif;color:#d8d8d8}'
+    + '#sotr-admin .win{width:860px;height:580px;display:flex;flex-direction:column;background:rgba(0,0,0,.86);border-top:1px solid rgba(255,255,255,.55);border-bottom:1px solid rgba(255,255,255,.55)}'
+    + '#sotr-admin .top{display:flex;align-items:baseline;padding:16px 22px 12px;border-bottom:1px solid rgba(255,255,255,.18)}'
+    + '#sotr-admin .top .t{font-size:22px;letter-spacing:3px;text-transform:uppercase;color:#fff}'
+    + '#sotr-admin .top .x{margin-left:auto;cursor:pointer;color:#8a8a8a;font-size:13px;letter-spacing:2px;text-transform:uppercase}#sotr-admin .top .x:hover{color:#fff}'
     + '#sotr-admin .body{flex:1;display:flex;min-height:0}'
-    + '#sotr-admin .nav{width:150px;border-right:1px solid #3a3124;padding:8px 0}'
-    + '#sotr-admin .nav div{padding:11px 16px;cursor:pointer;border-left:3px solid transparent}#sotr-admin .nav div:hover{background:#2a241b}'
-    + '#sotr-admin .nav div.on{background:#342b1f;border-left-color:#e6c77f;color:#fff}'
-    + '#sotr-admin .page{flex:1;padding:14px 16px;overflow:auto;display:none}#sotr-admin .page.on{display:block}'
-    + '#sotr-admin .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}'
-    + '#sotr-admin .chip{padding:5px 11px;border:1px solid #5a4c33;border-radius:14px;cursor:pointer;font-size:13px;background:#1f1a13}'
-    + '#sotr-admin .chip:hover{border-color:#9c8352}#sotr-admin .chip.on{background:#6b5530;border-color:#e6c77f;color:#fff}'
-    + '#sotr-admin .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}'
-    + '#sotr-admin .card{padding:10px 6px;text-align:center;border:1px solid #3d3325;border-radius:8px;cursor:pointer;background:#1c1812}'
-    + '#sotr-admin .card:hover{border-color:#9c8352;background:#261f16}#sotr-admin .card.on{border-color:#e6c77f;background:#3a2f1f}'
-    + '#sotr-admin .card .i{font-size:28px}#sotr-admin .card .n{margin-top:4px;font-size:13px}#sotr-admin .card .c{font-size:11px;opacity:.55}'
-    + '#sotr-admin .split{display:flex;gap:14px;height:100%}#sotr-admin .split .l{flex:1;overflow:auto}#sotr-admin .split .r{width:270px;border-left:1px solid #3a3124;padding-left:14px;overflow:auto}'
-    + '#sotr-admin h3{margin:2px 0 10px;font-weight:600;color:#e6c77f}#sotr-admin label{display:block;margin:10px 0 5px;font-size:12px;opacity:.7;text-transform:uppercase;letter-spacing:.6px}'
-    + '#sotr-admin button{font:inherit;color:#fff;background:#6b5530;border:1px solid #9c8352;border-radius:6px;padding:8px 12px;cursor:pointer}'
-    + '#sotr-admin button:hover{background:#80663a}#sotr-admin button.big{width:100%;padding:11px;font-size:15px;margin-top:12px}'
-    + '#sotr-admin button.ghost{background:transparent;border-color:#5a4c33;color:#eadfc8}#sotr-admin button.ghost:hover{background:#2a241b}'
-    + '#sotr-admin button.danger{background:#6e2a22;border-color:#a1473a}#sotr-admin button.danger:hover{background:#86342a}'
-    + '#sotr-admin button.s{padding:4px 7px;font-size:12px}'
-    + '#sotr-admin input,#sotr-admin textarea{font:inherit;color:#eee;background:#120f0b;border:1px solid #4d4130;border-radius:6px;padding:7px;box-sizing:border-box}'
-    + '#sotr-admin .step{display:flex;align-items:center;gap:8px}#sotr-admin .step span{min-width:26px;text-align:center;font-size:16px}'
-    + '#sotr-admin .vlist div{padding:6px 8px;border-bottom:1px solid #2c261c;cursor:pointer;font-size:13px}#sotr-admin .vlist div:hover{background:#2a241b}'
-    + '#sotr-admin .vlist small{opacity:.55;margin-left:6px}'
-    + '#sotr-admin table{width:100%;border-collapse:collapse}#sotr-admin td,#sotr-admin th{padding:7px 6px;border-bottom:1px solid #2c261c;text-align:left;font-size:13px}#sotr-admin th{opacity:.6;font-weight:500}'
-    + '#sotr-admin .bar{height:6px;background:#2a241b;border-radius:3px;overflow:hidden;width:90px}#sotr-admin .bar i{display:block;height:100%;background:#c9a55a}'
-    + '#sotr-admin .stats{display:flex;gap:10px;margin-bottom:16px}#sotr-admin .stat{flex:1;padding:12px;border:1px solid #3d3325;border-radius:8px;background:#1c1812}#sotr-admin .stat b{display:block;font-size:24px;color:#e6c77f}'
-    + '#sotr-admin .toast{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);background:#2e261a;border:1px solid #9c8352;border-radius:8px;padding:9px 16px;opacity:0;transition:opacity .3s;pointer-events:none}'
-    + '#sotr-admin .hint{font-size:12px;opacity:.55;margin-top:8px}#sotr-admin .empty{opacity:.6;padding:30px;text-align:center}';
+    + '#sotr-admin .nav{width:170px;border-right:1px solid rgba(255,255,255,.18);padding:10px 0}'
+    + '#sotr-admin .nav div{padding:10px 22px;cursor:pointer;letter-spacing:2px;text-transform:uppercase;font-size:14px;color:#8a8a8a}'
+    + '#sotr-admin .nav div:hover{color:#fff}#sotr-admin .nav div.on{color:#fff}#sotr-admin .nav div.on:before{content:"";display:inline-block;width:6px;height:6px;background:#fff;transform:rotate(45deg);margin:0 10px 2px -16px}'
+    + '#sotr-admin .page{flex:1;padding:16px 22px;overflow:auto;display:none}#sotr-admin .page.on{display:block}'
+    + '#sotr-admin .tabs{display:flex;flex-wrap:wrap;gap:4px 18px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.12)}'
+    + '#sotr-admin .tab{cursor:pointer;letter-spacing:1.5px;text-transform:uppercase;font-size:13px;color:#8a8a8a}#sotr-admin .tab:hover,#sotr-admin .tab.on{color:#fff}'
+    + '#sotr-admin .list div{padding:6px 10px;cursor:pointer;color:#bdbdbd;border-left:2px solid transparent}#sotr-admin .list div:hover{color:#fff;background:rgba(255,255,255,.06)}'
+    + '#sotr-admin .list div.on{color:#fff;border-left-color:#fff;background:rgba(255,255,255,.08)}#sotr-admin .list small{color:#777;margin-left:8px}'
+    + '#sotr-admin .split{display:flex;gap:20px;height:100%}#sotr-admin .split .l{flex:1;overflow:auto}#sotr-admin .split .r{width:290px;border-left:1px solid rgba(255,255,255,.18);padding-left:20px;overflow:auto}'
+    + '#sotr-admin h3{margin:0 0 12px;font-weight:normal;font-size:20px;letter-spacing:2px;text-transform:uppercase;color:#fff}'
+    + '#sotr-admin label{display:block;margin:14px 0 6px;font-size:12px;color:#8a8a8a;text-transform:uppercase;letter-spacing:2px}'
+    + '#sotr-admin button{font:inherit;font-size:14px;letter-spacing:1.5px;text-transform:uppercase;color:#d8d8d8;background:transparent;border:1px solid rgba(255,255,255,.35);padding:7px 14px;cursor:pointer}'
+    + '#sotr-admin button:hover{color:#fff;border-color:#fff;background:rgba(255,255,255,.08)}#sotr-admin button.wide{width:100%;margin-top:10px}'
+    + '#sotr-admin button.s{font-size:12px;padding:3px 7px;letter-spacing:1px}#sotr-admin button.danger:hover{border-color:#c25b4a;color:#e08a7a}'
+    + '#sotr-admin input,#sotr-admin textarea{font:inherit;color:#fff;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.25);padding:8px;box-sizing:border-box;outline:none}'
+    + '#sotr-admin .step{display:flex;align-items:center;gap:10px}#sotr-admin .step span{min-width:28px;text-align:center;font-size:18px;color:#fff}'
+    + '#sotr-admin table{width:100%;border-collapse:collapse}#sotr-admin td,#sotr-admin th{padding:7px 6px;border-bottom:1px solid rgba(255,255,255,.1);text-align:left;font-size:14px}'
+    + '#sotr-admin th{color:#8a8a8a;font-weight:normal;font-size:12px;letter-spacing:2px;text-transform:uppercase}'
+    + '#sotr-admin .acts{display:flex;flex-wrap:wrap;gap:4px}'
+    + '#sotr-admin .stats{display:flex;gap:30px;margin-bottom:20px}#sotr-admin .stat{color:#8a8a8a;font-size:12px;letter-spacing:2px;text-transform:uppercase}#sotr-admin .stat b{display:block;font-size:30px;font-weight:normal;color:#fff;letter-spacing:0}'
+    + '#sotr-admin .toast{position:absolute;bottom:40px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);border-top:1px solid rgba(255,255,255,.5);border-bottom:1px solid rgba(255,255,255,.5);padding:9px 24px;opacity:0;transition:opacity .3s;pointer-events:none}'
+    + '#sotr-admin .hint{font-size:13px;color:#777;margin-top:10px}#sotr-admin .empty{color:#777;padding:30px 0;text-align:center}';
 
   root = document.createElement('div');
   root.id = 'sotr-admin';
   root.innerHTML = '<style>' + css + '</style>'
-    + '<div class="win"><div class="top">⚔️&nbsp;<b>Skyrim Online TR</b>&nbsp;— Yönetim<span class="x" title="Kapat (F7 / Esc)">✕</span></div>'
+    + '<div class="win"><div class="top"><span class="t">Skyrim Online TR</span><span class="x">Close (F7)</span></div>'
     + '<div class="body"><div class="nav">'
-    + '<div data-p="spawn" class="on">🐺 Yaratıklar</div><div data-p="players">👥 Oyuncular</div><div data-p="server">📢 Sunucu</div>'
+    + '<div data-p="spawn" class="on">Creatures</div><div data-p="players">Players</div><div data-p="server">Server</div>'
     + '</div>'
     + '<div class="page on" id="sa-spawn"><div class="split"><div class="l">'
-    + '<div class="chips" id="sa-groups"></div><div class="grid" id="sa-grid"><div class="empty">Yükleniyor…</div></div></div>'
-    + '<div class="r" id="sa-detail"><div class="empty">Soldan bir yaratık seç.</div></div></div></div>'
-    + '<div class="page" id="sa-players"><div style="display:flex;align-items:center;margin-bottom:8px"><h3 style="margin:0">Çevrimiçi oyuncular</h3><button class="ghost s" id="sa-refresh" style="margin-left:auto">↻ Yenile</button></div><div id="sa-ptable"></div>'
-    + '<div class="hint">📍 yanına git · 🧲 yanına çek · ❤️ iyileştir · ⭐ bir level ver · ✨ 100 XP · ♻️ perk sıfırla · 🔁 beceri sıfırla · ☠️ öldür</div></div>'
+    + '<div class="tabs" id="sa-groups"></div><div class="list" id="sa-grid"><div class="empty">Loading...</div></div></div>'
+    + '<div class="r" id="sa-detail"><div class="empty">Select a creature.</div></div></div></div>'
+    + '<div class="page" id="sa-players"><div style="display:flex;align-items:center;margin-bottom:10px"><h3 style="margin:0">Online Players</h3><button class="s" id="sa-refresh" style="margin-left:auto">Refresh</button></div><div id="sa-ptable"></div></div>'
     + '<div class="page" id="sa-server"><div class="stats" id="sa-stats"></div>'
-    + '<label>Duyuru (herkesin ekranında görünür)</label><textarea id="sa-ann" rows="3" style="width:100%" maxlength="200" placeholder="Örn: 10 dakika sonra sunucu yeniden başlayacak"></textarea>'
-    + '<button id="sa-ann-send" style="margin-top:8px">📢 Duyur</button>'
-    + '<label style="margin-top:22px">Temizlik</label><button class="danger" id="sa-clear-all">🧹 Sunucudaki tüm doğurulmuş yaratıkları kaldır</button></div>'
+    + '<label>Announcement</label><textarea id="sa-ann" rows="3" style="width:100%" maxlength="200" placeholder="Shown on every player\'s screen"></textarea>'
+    + '<button id="sa-ann-send" style="margin-top:10px">Announce</button>'
+    + '<label style="margin-top:28px">Cleanup</label><button class="danger" id="sa-clear-all">Remove all spawned creatures</button></div>'
     + '</div></div><div class="toast" id="sa-toast"></div>';
   document.body.appendChild(root);
 
   var $ = function (s) { return root.querySelector(s); };
   var send = function (p) { window.skyrimPlatform.sendMessage('sotrAdmin', JSON.stringify(p)); };
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
-  var S = { families: [], group: 'Hepsi', fam: null, role: 'any', tier: 'any', n: 1, variants: {}, showList: false, roleNames: {}, tierNames: {}, me: 0 };
+  var S = { families: [], group: 'All', fam: null, role: 'any', tier: 'any', n: 1, variants: {}, showList: false, roleNames: {}, tierNames: {}, me: 0 };
   var toastTimer = 0;
   var armed = '';
   // CEF'te confirm() çalışmayabilir: tehlikeli işlemler ikinci tıkta onaylanır
   var sure = function (key, text) {
     if (armed === key) { armed = ''; return true; }
     armed = key;
-    toast(text + ' Onaylamak için tekrar tıkla.');
+    toast(text + ' Click again to confirm.');
     setTimeout(function () { if (armed === key) armed = ''; }, 4000);
     return false;
   };
@@ -853,17 +850,17 @@ function sotrAdminPanel(show) {
   });
 
   function renderGroups() {
-    var groups = ['Hepsi'];
+    var groups = ['All'];
     S.families.forEach(function (f) { if (groups.indexOf(f.group) < 0) groups.push(f.group); });
-    $('#sa-groups').innerHTML = groups.map(function (g) { return '<span class="chip' + (g === S.group ? ' on' : '') + '" data-g="' + esc(g) + '">' + esc(g) + '</span>'; }).join('');
-    $('#sa-groups').querySelectorAll('.chip').forEach(function (c) { c.onclick = function () { S.group = c.dataset.g; renderGroups(); renderGrid(); }; });
+    $('#sa-groups').innerHTML = groups.map(function (g) { return '<span class="tab' + (g === S.group ? ' on' : '') + '" data-g="' + esc(g) + '">' + esc(g) + '</span>'; }).join('');
+    $('#sa-groups').querySelectorAll('.tab').forEach(function (c) { c.onclick = function () { S.group = c.dataset.g; renderGroups(); renderGrid(); }; });
   }
   function renderGrid() {
-    var list = S.families.filter(function (f) { return S.group === 'Hepsi' || f.group === S.group; });
+    var list = S.families.filter(function (f) { return S.group === 'All' || f.group === S.group; });
     $('#sa-grid').innerHTML = list.map(function (f) {
-      return '<div class="card' + (S.fam && S.fam.key === f.key ? ' on' : '') + '" data-k="' + f.key + '"><div class="i">' + f.icon + '</div><div class="n">' + esc(f.name) + '</div><div class="c">' + f.count + ' çeşit</div></div>';
+      return '<div class="' + (S.fam && S.fam.key === f.key ? 'on' : '') + '" data-k="' + f.key + '">' + esc(f.name) + '<small>' + f.count + ' variants</small></div>';
     }).join('');
-    $('#sa-grid').querySelectorAll('.card').forEach(function (c) {
+    $('#sa-grid').querySelectorAll('[data-k]').forEach(function (c) {
       c.onclick = function () {
         S.fam = S.families.filter(function (f) { return f.key === c.dataset.k; })[0];
         S.role = 'any'; S.tier = 'any'; S.showList = false;
@@ -872,9 +869,9 @@ function sotrAdminPanel(show) {
       };
     });
   }
-  function chipRow(items, cur, names, attr) {
-    return '<div class="chips">' + ['any'].concat(items).map(function (k) {
-      return '<span class="chip' + (k === cur ? ' on' : '') + '" data-' + attr + '="' + k + '">' + (k === 'any' ? 'Hepsi' : esc(names[k] || k)) + '</span>';
+  function tabRow(items, cur, names, attr) {
+    return '<div class="tabs">' + ['any'].concat(items).map(function (k) {
+      return '<span class="tab' + (k === cur ? ' on' : '') + '" data-' + attr + '="' + k + '">' + (k === 'any' ? 'Any' : esc(names[k] || k)) + '</span>';
     }).join('') + '</div>';
   }
   function filteredVariants() {
@@ -883,18 +880,18 @@ function sotrAdminPanel(show) {
   function renderDetail() {
     var f = S.fam;
     if (!f) return;
-    var h = '<h3>' + f.icon + ' ' + esc(f.name) + '</h3>';
-    if (f.roles.length > 1) h += '<label>Tür</label>' + chipRow(f.roles, S.role, S.roleNames, 'role');
-    if (f.tiers.length > 1) h += '<label>Güç</label>' + chipRow(['weak', 'mid', 'strong'].filter(function (t) { return f.tiers.indexOf(t) >= 0; }), S.tier, S.tierNames, 'tier');
-    h += '<label>Adet</label><div class="step"><button class="ghost s" id="sa-minus">−</button><span id="sa-n">' + S.n + '</span><button class="ghost s" id="sa-plus">+</button></div>';
-    h += '<button class="big" id="sa-go">🎲 Rastgele doğur</button>';
-    h += '<button class="ghost" id="sa-mine" style="width:100%;margin-top:8px">🧹 Doğurduklarımı temizle</button>';
-    h += '<div style="margin-top:14px;cursor:pointer;opacity:.8" id="sa-toggle">' + (S.showList ? '▾' : '▸') + ' Belirli bir çeşit seç</div>';
+    var h = '<h3>' + esc(f.name) + '</h3>';
+    if (f.roles.length > 1) h += '<label>Type</label>' + tabRow(f.roles, S.role, S.roleNames, 'role');
+    if (f.tiers.length > 1) h += '<label>Strength</label>' + tabRow(['weak', 'mid', 'strong'].filter(function (t) { return f.tiers.indexOf(t) >= 0; }), S.tier, S.tierNames, 'tier');
+    h += '<label>Count</label><div class="step"><button class="s" id="sa-minus">-</button><span id="sa-n">' + S.n + '</span><button class="s" id="sa-plus">+</button></div>';
+    h += '<button class="wide" id="sa-go">Spawn random</button>';
+    h += '<button class="wide" id="sa-mine">Remove my creatures</button>';
+    h += '<label style="cursor:pointer" id="sa-toggle">' + (S.showList ? 'Hide variants' : 'Choose a variant') + '</label>';
     if (S.showList) {
       var vs = filteredVariants();
-      h += '<div class="vlist">' + (S.variants[f.key] ? (vs.length ? vs.map(function (v) {
-        return '<div data-id="' + v.id + '">' + esc(v.name) + '<small>' + esc((S.roleNames[v.role] || '') + (v.tier ? ' · ' + S.tierNames[v.tier] : '')) + '</small></div>';
-      }).join('') : '<div class="empty">Bu seçime uyan çeşit yok.</div>') : '<div class="empty">Yükleniyor…</div>') + '</div>';
+      h += '<div class="list">' + (S.variants[f.key] ? (vs.length ? vs.map(function (v) {
+        return '<div data-id="' + v.id + '">' + esc(v.name) + '</div>';
+      }).join('') : '<div class="empty">No variants match.</div>') : '<div class="empty">Loading...</div>') + '</div>';
     }
     var d = $('#sa-detail');
     d.innerHTML = h;
@@ -905,29 +902,28 @@ function sotrAdminPanel(show) {
     $('#sa-go').onclick = function () { send({ op: 'spawn', family: f.key, role: S.role, tier: S.tier, n: S.n }); };
     $('#sa-mine').onclick = function () { send({ op: 'clear' }); };
     $('#sa-toggle').onclick = function () { S.showList = !S.showList; renderDetail(); };
-    d.querySelectorAll('.vlist [data-id]').forEach(function (r) { r.onclick = function () { send({ op: 'spawn', family: f.key, id: +r.dataset.id, n: S.n }); }; });
+    d.querySelectorAll('.list [data-id]').forEach(function (r) { r.onclick = function () { send({ op: 'spawn', family: f.key, id: +r.dataset.id, n: S.n }); }; });
   }
   function renderPlayers(players, stats) {
-    var acts = [['goto', '📍'], ['bring', '🧲'], ['heal', '❤️'], ['level', '⭐'], ['xp', '✨'], ['resetPerks', '♻️'], ['resetSkills', '🔁'], ['kill', '☠️']];
-    $('#sa-ptable').innerHTML = players.length ? '<table><tr><th>Oyuncu</th><th>Level</th><th>XP</th><th>Can</th><th>Puan</th><th></th></tr>' + players.map(function (p) {
-      var pct = Math.min(100, Math.round((100 * p.xp) / p.need));
-      return '<tr><td>' + esc(p.name) + (p.id === S.me ? ' <small style="opacity:.5">(sen)</small>' : '') + '</td><td>' + p.lvl + '</td><td><div class="bar" title="' + p.xp + ' / ' + p.need + '"><i style="width:' + pct + '%"></i></div></td>'
-        + '<td>' + (p.dead ? '☠️' : p.hp + '%') + '</td><td title="perk / beceri">' + p.pp + ' / ' + p.sp + '</td><td style="white-space:nowrap">'
-        + acts.filter(function (a) { return p.id !== S.me || (a[0] !== 'goto' && a[0] !== 'bring'); }).map(function (a) { return '<button class="ghost s" data-t="' + p.id + '" data-a="' + a[0] + '">' + a[1] + '</button>'; }).join(' ') + '</td></tr>';
-    }).join('') + '</table>' : '<div class="empty">Çevrimiçi oyuncu yok.</div>';
+    var acts = [['goto', 'Go to'], ['bring', 'Bring'], ['heal', 'Heal'], ['level', 'Level up'], ['xp', '+100 XP'], ['resetPerks', 'Reset perks'], ['resetSkills', 'Reset skills'], ['kill', 'Kill']];
+    $('#sa-ptable').innerHTML = players.length ? '<table><tr><th>Player</th><th>Level</th><th>XP</th><th>Health</th><th>Perks</th><th>Skills</th><th></th></tr>' + players.map(function (p) {
+      return '<tr><td>' + esc(p.name) + (p.id === S.me ? ' <small style="color:#777">(you)</small>' : '') + '</td><td>' + p.lvl + '</td><td>' + p.xp + ' / ' + p.need + '</td>'
+        + '<td>' + (p.dead ? 'Dead' : p.hp + '%') + '</td><td>' + p.pp + '</td><td>' + p.sp + '</td><td><div class="acts">'
+        + acts.filter(function (a) { return p.id !== S.me || (a[0] !== 'goto' && a[0] !== 'bring'); }).map(function (a) { return '<button class="s' + (a[0] === 'kill' || a[0].indexOf('reset') === 0 ? ' danger' : '') + '" data-t="' + p.id + '" data-a="' + a[0] + '">' + a[1] + '</button>'; }).join('') + '</div></td></tr>';
+    }).join('') + '</table>' : '<div class="empty">No players online.</div>';
     $('#sa-ptable').querySelectorAll('button').forEach(function (b) {
       b.onclick = function () {
-        if ((b.dataset.a === 'kill' || b.dataset.a.indexOf('reset') === 0) && !sure(b.dataset.a + b.dataset.t, 'Emin misin?')) return;
+        if ((b.dataset.a === 'kill' || b.dataset.a.indexOf('reset') === 0) && !sure(b.dataset.a + b.dataset.t, 'Are you sure?')) return;
         send({ op: 'player', target: +b.dataset.t, action: b.dataset.a, amount: 100 });
       };
     });
     if (stats) {
-      $('#sa-stats').innerHTML = '<div class="stat"><b>' + stats.online + '</b>çevrimiçi oyuncu</div><div class="stat"><b>' + stats.spawned + '</b>doğurulmuş yaratık</div><div class="stat"><b>' + (stats.uptimeMin >= 60 ? Math.floor(stats.uptimeMin / 60) + ' sa ' : '') + (stats.uptimeMin % 60) + ' dk</b>gamemode çalışma süresi</div>';
+      $('#sa-stats').innerHTML = '<div class="stat"><b>' + stats.online + '</b>Players online</div><div class="stat"><b>' + stats.spawned + '</b>Spawned creatures</div><div class="stat"><b>' + (stats.uptimeMin >= 60 ? Math.floor(stats.uptimeMin / 60) + 'h ' : '') + (stats.uptimeMin % 60) + 'm</b>Uptime</div>';
     }
   }
   $('#sa-refresh').onclick = function () { send({ op: 'players' }); };
   $('#sa-ann-send').onclick = function () { var t = $('#sa-ann').value; if (t.trim()) { send({ op: 'announce', text: t }); $('#sa-ann').value = ''; } };
-  $('#sa-clear-all').onclick = function () { if (sure('clearAll', 'Tüm doğurulmuş yaratıklar kaldırılacak')) send({ op: 'clearAll' }); };
+  $('#sa-clear-all').onclick = function () { if (sure('clearAll', 'All spawned creatures will be removed.')) send({ op: 'clearAll' }); };
 
   window.sotrAdminRecv = function (m) {
     if (m.type === 'init') {
@@ -1837,7 +1833,7 @@ const dropLoot = (victim, killer) => {
   const { out, rare } = rollLoot(key, lvl, boss);
   if (out.length === 0) return;
   addToInventory(victim, out);
-  if (rare && killer && isPlayer(killer)) notify(killer, '✨ Nadir bir ganimet düştü! Cesedi ara.');
+  if (rare && killer && isPlayer(killer)) notify(killer, 'Something rare dropped. Search the body.');
   console.log(`[sotr-loot] ${ed} (sv ${lvl}${boss ? ', boss' : ''}): ${out.map(([id, n]) => `${id.toString(16)}×${n}`).join(' ')}${rare ? ' NADİR' : ''}`);
 };
 
@@ -1913,7 +1909,7 @@ const onChestActivate = (ref, caster) => {
   const lvl = spec.kind === 'boss' ? Math.max(plvl + 8, 16) : plvl;
   const { out, rare } = chestLoot(lvl, spec);
   addToInventory(ref, out);
-  if (rare) notify(caster, '✨ Sandıkta nadir bir şey parlıyor!');
+  if (rare) notify(caster, 'Something rare glints inside the chest.');
   console.log(`[sotr-loot] sandık ${rec.editorId} ${key} (sv ${lvl}) ${actorName(caster)}: ${out.map(([id, n]) => `${id.toString(16)}×${n}`).join(' ')}${rare ? ' NADİR' : ''}`);
 };
 
